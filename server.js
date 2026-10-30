@@ -36,7 +36,13 @@ const stripeApi = async (method, p, params, account) => {
 const OWNER_EMAIL = (env.OWNER_EMAIL || '').trim().toLowerCase();
 const OWNER_HASH = env.OWNER_PASSWORD ? bcrypt.hashSync(env.OWNER_PASSWORD, 12) : null;
 const sessions = new Map(); // token -> { email, exp, oauthState }
-const SESSION_MS = 12 * 3600 * 1000;
+const SESSION_MS = 12 * 3600 * 1000, KEEP_MS = 30 * 864e5;
+// Stateless signed owner cookie so logins survive Render restarts. Key comes from SESSION_SECRET if set,
+// otherwise it is derived from the owner login env vars (changing the password signs everyone out). No secret in code.
+const SESSION_KEY = crypto.createHash('sha256').update('ctq-owner-session-v1|' + (env.SESSION_SECRET || (OWNER_EMAIL + '|' + (env.OWNER_PASSWORD || '')))).digest();
+const revoked = new Map(); // nonce -> exp (logout in this process)
+const sign = v => crypto.createHmac('sha256', SESSION_KEY).update(v).digest('base64url');
+const makeToken = exp => { const v = `v1.${exp}.${crypto.randomBytes(16).toString('base64url')}`; return v + '.' + sign(v); };
 const fails = new Map(); // ip -> [timestamps]
 const LIMIT = { max: 5, windowMs: 15 * 60 * 1000 };
 
@@ -223,8 +229,12 @@ app.get('/api/orders/:id', async (req, res) => { res.set('Cache-Control', 'no-st
   res.json({ ok: true, order: publicOrder(o) }); });
 
 // ---------- owner auth routes ----------
-const setCookie = (req, res, v, maxAge) => res.set('Set-Cookie', `ctq_owner=${v}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${req.secure ? '; Secure' : ''}`);
-const getSession = req => { const t = cookies(req).ctq_owner; const s = t && sessions.get(t); if (!s) return null; if (s.exp < Date.now()) { sessions.delete(t); return null; } return Object.assign(s, { token: t }); };
+const setCookie = (req, res, v, maxAge) => res.set('Set-Cookie', `ctq_owner=${v}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${req.secure || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''}`);
+const getSession = req => { const t = String(cookies(req).ctq_owner || ''); const m = /^(v1\.(\d{13})\.([A-Za-z0-9_-]{22}))\.([A-Za-z0-9_-]{43})$/.exec(t); if (!m || !OWNER_EMAIL) return null;
+  const a = Buffer.from(sign(m[1])), b = Buffer.from(m[4]); if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  const exp = +m[2]; if (exp < Date.now() || revoked.has(m[3])) return null;
+  if (!sessions.has(m[3])) sessions.set(m[3], { email: OWNER_EMAIL, exp }); return Object.assign(sessions.get(m[3]), { token: m[3] }); };
+setInterval(() => { const now = Date.now(); for (const [k, v] of sessions) if (v.exp < now) sessions.delete(k); for (const [k, v] of revoked) if (v < now) revoked.delete(k); }, 3600e3).unref();
 const needOwner = (req, res, next) => { res.set('X-Robots-Tag', 'noindex, nofollow'); res.set('Cache-Control', 'no-store'); const s = getSession(req); if (!s) return res.status(401).json({ ok: false, error: 'Log in first' }); req.owner = s; next(); };
 
 app.post('/api/owner/login', async (req, res) => {
@@ -236,10 +246,10 @@ app.post('/api/owner/login', async (req, res) => {
   const ok = String(email || '').trim().toLowerCase() === OWNER_EMAIL & (await bcrypt.compare(String(password || '').slice(0, 200), OWNER_HASH));
   if (!ok) { f.push(now); return res.status(401).json({ ok: false, error: 'That email or password is wrong.', left: Math.max(0, LIMIT.max - f.length) }); }
   fails.delete(ip);
-  const token = crypto.randomBytes(32).toString('hex'); sessions.set(token, { email: OWNER_EMAIL, exp: now + SESSION_MS });
-  setCookie(req, res, token, SESSION_MS / 1000); res.json({ ok: true, email: OWNER_EMAIL });
+  const keep = req.body.keep === true, ms = keep ? KEEP_MS : SESSION_MS;
+  setCookie(req, res, makeToken(now + ms), ms / 1000); res.json({ ok: true, email: OWNER_EMAIL, keep });
 });
-app.post('/api/owner/logout', (req, res) => { const s = getSession(req); if (s) sessions.delete(s.token); setCookie(req, res, '', 0); res.json({ ok: true }); });
+app.post('/api/owner/logout', (req, res) => { const s = getSession(req); if (s) { revoked.set(s.token, s.exp); sessions.delete(s.token); } setCookie(req, res, '', 0); res.json({ ok: true }); });
 
 // ---------- owner API ----------
 app.use('/api/admin', needOwner);

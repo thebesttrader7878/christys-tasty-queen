@@ -23,14 +23,32 @@
   const fmtDay = iso => new Date(iso).toLocaleDateString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric' });
   const ago = iso => { const s = (Date.now() - new Date(iso)) / 1000; return s < 60 ? 'just now' : s < 3600 ? Math.floor(s / 60) + ' min ago' : fmtDay(iso) + ' ' + fmtTime(iso); };
 
-  // New-order chime (Web Audio, no files). Browsers only allow sound after a tap, so we unlock on first tap.
-  let actx = null; document.addEventListener('pointerdown', () => { if (!actx) try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }, { once: false });
-  const chime = () => { window.__chimes = (window.__chimes || 0) + 1; if (!actx) return; [880, 1175, 1568].forEach((f, i) => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; o.connect(g); g.connect(actx.destination); const t = actx.currentTime + i * .16; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .3); o.start(t); o.stop(t + .32); }); };
+  const LS = { get: (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  // New-order "ka-ching" cash register sound, synthesized with Web Audio (no audio files).
+  // Browsers (iPhone Safari especially) only allow sound after a tap, so the first tap unlocks it.
+  let actx = null;
+  const soundOn = () => LS.get('ctq_sound', true);
+  const unlock = () => { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume();
+      const b = actx.createBuffer(1, 1, 22050), s = actx.createBufferSource(); s.buffer = b; s.connect(actx.destination); s.start(0); } catch (e) {}
+    const p = $('[data-testid=sound-prompt]'); if (p && actx && actx.state !== 'suspended') p.remove(); };
+  document.addEventListener('pointerdown', unlock); document.addEventListener('touchend', unlock); document.addEventListener('keydown', unlock);
+  const audioReady = () => !!actx && actx.state === 'running';
+  const kaching = () => { if (!actx) return; const t0 = actx.currentTime + .02, out = actx.createGain(); out.gain.value = .55; out.connect(actx.destination);
+    // "ka": short noisy mechanical clack of the drawer
+    const n = actx.createBuffer(1, Math.floor(actx.sampleRate * .06), actx.sampleRate), d = n.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+    const ns = actx.createBufferSource(), bp = actx.createBiquadFilter(), ng = actx.createGain(); ns.buffer = n; bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = .8; ng.gain.value = .9; ns.connect(bp); bp.connect(ng); ng.connect(out); ns.start(t0);
+    // "ching": bright bell, two strikes, inharmonic partials with long decay
+    [[t0 + .09, 1], [t0 + .2, .85]].forEach(([t, a]) => [[2093, 1], [2637, .5], [3136, .35], [4186, .25], [5274, .12]].forEach(([f, v]) => {
+      const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f * (1 + (Math.random() - .5) * .004); o.connect(g); g.connect(out);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32 * v * a, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + 1.1 - f / 9000); o.start(t); o.stop(t + 1.2); })); };
+  const chime = () => { window.__chimes = (window.__chimes || 0) + 1; if (!soundOn()) return; window.__played = (window.__played || 0) + (audioReady() ? 1 : 0); if (actx) { if (actx.state === 'suspended') actx.resume(); kaching(); } };
+  const soundBar = () => !S.me ? '' : `<div class="sndbar"><button class="chip ${soundOn() ? 'on' : ''}" data-act="sound" data-testid="sound-toggle" aria-pressed="${soundOn()}">${soundOn() ? '🔔 Sound on' : '🔕 Sound off'}</button>${soundOn() && !audioReady() ? '<button class="chip warn" data-act="sound-enable" data-testid="sound-prompt">Tap to enable order sound</button>' : ''}</div>`;
 
   // ---------- login ----------
   const login = () => `<main class="login"><img src="/img/logo-180.jpg" alt="" class="logo"><h1>Owner login</h1><p class="mut">Kimmie’s-Christy's Tasty Queen</p>
     <form id="loginf" class="card" novalidate><label>Email<input type="email" name="email" autocomplete="username" required value="${esc(S.email || '')}" data-testid="login-email"></label>
     <label>Password<input type="password" name="password" autocomplete="current-password" required data-testid="login-pass"></label>
+    <label class="tog keep"><input type="checkbox" name="keep" ${LS.get('ctq_keep', true) ? 'checked' : ''} data-testid="login-keep"> Keep me signed in for 30 days</label>
     <p class="err" data-testid="login-err" ${S.err ? '' : 'hidden'}>${esc(S.err)}</p><button class="btn" data-testid="login-btn">Log in</button></form>
     <p class="fine">Customers can’t see this page. <a href="/">Back to the store</a></p></main>`;
 
@@ -43,7 +61,7 @@
     <div class="row fine"><span>${ago(o.created)}</span><span>${o.payment.method === 'store' ? 'Pay at pickup' : 'Paid by card'}${o.refunded ? ' · refunded ' + m(o.refunded) : ''}</span></div></button>`;
   const orders = () => { const list = shown(), cnt = k => S.orders.filter(o => k === 'active' ? ['new', 'preparing', 'ready'].includes(o.status) : k === 'all' || o.status === k).length;
     return `<div class="chips" role="tablist" data-testid="filters">${FILTERS.map(([k, l]) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-v="${k}" data-testid="filter-${k}">${l} <small>${cnt(k)}</small></button>`).join('')}</div>
-    <div class="list" data-testid="order-list">${list.length ? list.map(orderCard).join('') : `<div class="empty">No ${S.filter === 'all' ? '' : FILTERS.find(f => f[0] === S.filter)[1].toLowerCase()} orders right now. New ones pop up here with a ding.</div>`}</div>`; };
+    <div class="list" data-testid="order-list">${list.length ? list.map(orderCard).join('') : `<div class="empty">No ${S.filter === 'all' ? '' : FILTERS.find(f => f[0] === S.filter)[1].toLowerCase()} orders right now. New ones pop up here with a ka-ching.</div>`}</div>`; };
 
   const detail = o => { const left = +(o.total - (o.refunded || 0)).toFixed(2), canRefund = left > 0 && (o.payment.method === 'card' || o.status === 'completed'), tel = (o.customer.phone || '').replace(/\D/g, '');
     return `<div class="sheet" data-testid="order-detail"><div class="sheethead"><button class="x" data-act="close" aria-label="Close">✕</button><h2>Order #${esc(o.id)}</h2><span class="pill ${o.status}" data-testid="detail-status">${STATUS[o.status]}</span></div>
@@ -138,7 +156,7 @@
     const nNew = S.orders.filter(x => x.status === 'new').length;
     document.title = (nNew ? `(${nNew}) ` : '') + 'Orders · Owner';
     app.innerHTML = `<header class="top"><b>Owner dashboard</b><span class="fine">Kimmie’s-Christy's Tasty Queen</span></header>
-      <main class="main" data-testid="tab-${S.tab}">${body}</main>
+      <main class="main" data-testid="tab-${S.tab}">${S.tab === 'orders' || S.tab === 'live' ? soundBar() : ''}${body}</main>
       <nav class="tabs" data-testid="tabbar">${TABS.map(([k, l, i]) => `<button class="${S.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" data-testid="tab-btn-${k}"><span>${i}</span>${l}${k === 'orders' && nNew ? `<em class="badge" data-testid="badge">${nNew}</em>` : ''}</button>`).join('')}</nav>
       ${o ? `<div class="scrim" data-act="close"></div>${detail(o)}` : ''}`;
     if (!o) window.scrollTo(0, y); };
@@ -164,6 +182,8 @@
 
   const act = async (a, el) => { try {
     if (a === 'tab') { S.tab = el.dataset.v; S.open = null; history.replaceState(null, '', '#' + S.tab); window.scrollTo(0, 0); render(); loadTab(); }
+    else if (a === 'sound') { LS.set('ctq_sound', !soundOn()); if (soundOn()) { unlock(); kaching(); } render(); }
+    else if (a === 'sound-enable') { unlock(); kaching(); render(); }
     else if (a === 'filter') { S.filter = el.dataset.v; render(); }
     else if (a === 'open') { S.open = el.dataset.id; S.sheet = null; render(); }
     else if (a === 'close') { S.open = null; render(); }
@@ -182,7 +202,7 @@
     catch (er) { toast(er.message); loadTab(); } });
   document.addEventListener('submit', async e => { e.preventDefault(); const f = e.target, d = Object.fromEntries(new FormData(f)), btn = f.querySelector('button:not([type=button])');
     try { if (btn) btn.disabled = true;
-      if (f.id === 'loginf') { S.email = d.email; await api('/api/owner/login', { method: 'POST', body: { email: d.email, password: d.password } }); S.err = ''; S.me = await api('/api/admin/me'); start(); return; }
+      if (f.id === 'loginf') { S.email = d.email; await api('/api/owner/login', { method: 'POST', body: { email: d.email, password: d.password, keep: !!d.keep } }); LS.set('ctq_keep', !!d.keep); S.err = ''; S.me = await api('/api/admin/me'); start(); return; }
       if (f.id === 'cancelf') { const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/cancel`, { method: 'POST', body: { reason: d.reason } }); upd(r.order); toast('Order canceled'); }
       if (f.id === 'refundf') { const full = d.kind === 'full'; if (!full && !(+d.amount > 0)) throw new Error('Enter an amount.'); const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/refund`, { method: 'POST', body: { full, amount: +d.amount, reason: d.reason } }); upd(r.order); toast('Refunded ' + m(r.order.refunds[r.order.refunds.length - 1].amount)); }
       if (f.id === 'rangef') { let a = d.from || today(), b = d.to || a; if (a > b) [a, b] = [b, a]; S.from = a; S.to = b; S.rep = null; S.an = null; render(); await loadTab(); }
