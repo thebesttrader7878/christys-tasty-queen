@@ -129,3 +129,6 @@ label.f{display:grid;gap:5px;font-weight:600;font-size:14px}
  .tile.t0{grid-column:span 3;grid-row:span 2}.tile.t1{grid-column:span 3}.tile.t2{grid-column:span 3;display:block}
  .tile.t3,.tile.t4,.tile.t5{grid-column:span 2;display:block}.tile.t6{display:none}
 }
+.chip.pick{background:#fff;color:var(--red);border-color:#fff;padding:10px 16px;font-size:14px}
+.btn.dd{background:#fff;color:#eb1700;border:2px solid #fff}.btn.dd:hover{background:#fff1f0}
+.card .btn.dd{border-color:#eb1700;margin-top:4px}

@@ -8,12 +8,13 @@
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const DEF_SETTINGS = {
     name: "Christy's Tasty Queen", phone: '(913) 300-0130', address: '1405 S 55th St, Kansas City, KS 66106',
+    doordashUrl: 'https://www.doordash.com/store/christys-tasty-queen-kansas-city-35171507/',
     taxRate: 9.125, // example rate, confirm with owner / accountant
-    pickupMins: 15, deliveryMins: 40, deliveryOn: true, deliveryFee: 3.99, deliveryMin: 15, deliveryRadius: 4,
+    pickupMins: 15,
     acceptOrders: true, pos: 'none', pin: '1234',
     hours: DAYS.map(() => ({ open: '10:00', close: '18:00', closed: false })) // DoorDash showed 10am to 6pm on a Wednesday; confirm
   };
-  const S = { menu: null, cart: LS.get('ctq_cart', []), mode: LS.get('ctq_mode', 'pickup'), q: '', tip: 0 };
+  const S = { menu: null, cart: LS.get('ctq_cart', []), mode: 'pickup', q: '', tip: 0 };
   const settings = () => Object.assign({}, DEF_SETTINGS, LS.get('ctq_settings', {}));
   const saveSettings = s => LS.set('ctq_settings', s);
   const orders = () => LS.get('ctq_orders', []);
@@ -33,7 +34,7 @@
   const totals = (cart = S.cart, mode = S.mode, tip = S.tip, s = settings()) => {
     const subtotal = r2(cart.reduce((a, l) => a + l.unit * l.qty, 0));
     const tax = r2(subtotal * s.taxRate / 100);
-    const deliveryFee = mode === 'delivery' && cart.length ? +s.deliveryFee : 0;
+    const deliveryFee = 0;
     const total = r2(subtotal + tax + deliveryFee + (+tip || 0));
     return { subtotal, tax, deliveryFee, tip: +tip || 0, total };
   };
@@ -57,20 +58,21 @@
   const cartLines = (editable = true) => S.cart.length ? S.cart.map((l, i) => `<div class="line"><div class="grow"><b>${l.qty} × ${esc(l.name)}</b>${l.mods.length ? `<small>${esc(l.mods.join(', '))}</small>` : ''}${l.note ? `<small>Note: ${esc(l.note)}</small>` : ''}
     ${editable ? `<div style="display:flex;gap:6px;margin-top:6px"><button class="btn ghost sm" data-act="dec" data-i="${i}" aria-label="less">−</button><button class="btn ghost sm" data-act="inc" data-i="${i}" aria-label="more">+</button><button class="btn ghost sm" data-act="rm" data-i="${i}">Remove</button></div>` : ''}</div><b>${m(l.unit * l.qty)}</b></div>`).join('') : '<p class="fine">Your cart is empty. Go grab a tenderloin. 😋</p>';
 
-  const sumHtml = t => `<div class="sum"><div><span>Subtotal</span><span>${m(t.subtotal)}</span></div><div><span>Tax</span><span>${m(t.tax)}</span></div>${S.mode === 'delivery' ? `<div><span>Delivery fee</span><span>${m(t.deliveryFee)}</span></div>` : ''}${t.tip ? `<div><span>Tip</span><span>${m(t.tip)}</span></div>` : ''}<div class="tot"><span>Total</span><span data-testid="total">${m(t.total)}</span></div></div>`;
+  const sumHtml = t => `<div class="sum"><div><span>Subtotal</span><span>${m(t.subtotal)}</span></div><div><span>Tax</span><span>${m(t.tax)}</span></div>${t.tip ? `<div><span>Tip</span><span>${m(t.tip)}</span></div>` : ''}<div class="tot"><span>Total</span><span data-testid="total">${m(t.total)}</span></div></div>`;
 
   const HERO = ['tenderloin', 'double-cheeseburger-french-fries', 'onion-rings', 'philly-cheese-steak', 'breaded-shrimp', 'flavor-option', 'seasoned-suzy-q-s'];
   const mosaic = () => { const its = HERO.map(item).filter(x => x && x.image && !x.hidden);
     return `<div class="mosaic" data-testid="hero-photos">${its.map((it, i) => `<button class="tile t${i}" data-act="open" data-id="${it.id}" style="background-image:url('/${it.image}')" aria-label="${esc(it.name)}"><span>${it.id === 'flavor-option' ? 'Shakes &amp; malts' : esc(it.name) + ' · ' + m(it.price)}</span></button>`).join('')}</div>`; };
+  const ddBtn = (s, where) => `<a class="btn dd" href="${esc(s.doordashUrl)}" target="_blank" rel="noopener" data-testid="dd-${where}">🚗 Want delivery? Order on DoorDash</a>`;
   const store = () => { const s = settings(), open = openNow(s), hero = item('tenderloin');
     const cats = S.menu.categories.filter(c => c.items.some(id => item(id) && !item(id).hidden));
     const q = S.q.toLowerCase();
     return header() + `<section class="hero"><div class="wrap">${mosaic()}<div style="display:grid;gap:14px">
       <div class="chips"><span class="chip ${open && s.acceptOrders ? 'open' : 'closed'}" data-testid="openchip">${open && s.acceptOrders ? '● Open now' : '● Closed, order ahead'}</span><span class="chip">🕙 ${todayHours(s)}</span><span class="chip">📍 Turner, KCK</span></div>
       <h1>Burgers, tenderloins<br>& soft serve, made fresh.</h1>
-      <p>Order online from Christy's Tasty Queen for quick pickup${s.deliveryOn ? ' or local delivery' : ''}. ${esc(s.address)}</p>
-      <div class="ctas"><div class="modes" role="tablist"><button class="${S.mode === 'pickup' ? 'on' : ''}" data-act="mode" data-v="pickup" data-testid="mode-pickup">Pickup · ${s.pickupMins} min</button>${s.deliveryOn ? `<button class="${S.mode === 'delivery' ? 'on' : ''}" data-act="mode" data-v="delivery" data-testid="mode-delivery">Delivery · ${s.deliveryMins} min</button>` : ''}</div>
-      <a class="btn y" href="#menu" data-act="tomenu">Start your order</a></div></div>
+      <p>Order online from Christy's Tasty Queen for quick pickup. ${esc(s.address)}</p>
+      <div class="ctas"><span class="chip pick">🛍️ Pickup · ~${s.pickupMins} min</span>
+      <a class="btn y" href="#menu" data-act="tomenu">Start your order</a>${ddBtn(s, 'hero')}</div></div>
 </div></section>
       <nav class="catnav" id="menu"><div class="wrap">${cats.map(c => `<a href="#c-${c.id}" data-act="cat" data-c="${c.id}">${esc(c.name)}</a>`).join('')}</div></nav>
       <div class="wrap layout"><main>
@@ -107,14 +109,13 @@
     S.cart.push({ id: M.id, name: it.name, qty: M.qty, unit: lineUnit(it, M.sel), mods, note: M.note.trim() }); saveCart(); closeModal(); toast('Added ' + it.name); render(); };
 
   // ---------- checkout ----------
-  const checkout = () => { const s = settings(), t = totals(), c = LS.get('ctq_customer', {}), canDel = s.deliveryOn;
+  const checkout = () => { const s = settings(), t = totals(), c = LS.get('ctq_customer', {});
     if (!S.cart.length) return header() + `<div class="wrap page"><div class="card done"><div class="big">🛒</div><h3>Your cart is empty</h3><a class="btn" href="#/">Back to menu</a></div></div>`;
-    const belowMin = S.mode === 'delivery' && t.subtotal < s.deliveryMin;
+    const belowMin = false;
     return header() + `<div class="wrap page" style="max-width:640px"><a href="#/" class="fine">← Keep shopping</a><h1 style="margin:0;font-family:Fredoka">Checkout <span class="test">Test mode</span></h1>
       <form id="co" class="page" style="padding:0" data-testid="checkoutform">
-      <div class="card"><h3>How do you want it?</h3><div class="seg"><label><input type="radio" name="mode" value="pickup" ${S.mode === 'pickup' ? 'checked' : ''} data-ch="mode"> 🛍️ Pickup<span class="fine">&nbsp;~${s.pickupMins} min</span></label>${canDel ? `<label><input type="radio" name="mode" value="delivery" ${S.mode === 'delivery' ? 'checked' : ''} data-ch="mode" data-testid="co-delivery"> 🚗 Delivery<span class="fine">&nbsp;~${s.deliveryMins} min</span></label>` : ''}</div>
-        ${S.mode === 'delivery' ? `<label class="f">Delivery address<input type="text" name="address" required value="${esc(c.address || '')}" placeholder="Street, apt, city" data-testid="co-address"></label><p class="fine">Delivery within about ${s.deliveryRadius} miles. ${m(s.deliveryFee)} fee, ${m(s.deliveryMin)} minimum.</p>${belowMin ? `<p class="req">Add ${m(s.deliveryMin - t.subtotal)} more for delivery.</p>` : ''}` : `<p class="fine">Pick up at ${esc(s.address)}</p>`}
-        <label class="f">When<select name="when" data-testid="co-when"><option value="asap">ASAP</option>${laterSlots(s).map(x => `<option>${x}</option>`).join('')}</select></label></div>
+      <div class="card"><h3>Pickup 🛍️</h3><p class="fine" style="margin:0">Pick up at ${esc(s.address)}, ready in about ${s.pickupMins} min.</p>
+        <label class="f">When<select name="when" data-testid="co-when"><option value="asap">ASAP</option>${laterSlots(s).map(x => `<option>${x}</option>`).join('')}</select></label>${ddBtn(s, 'checkout')}</div>
       <div class="card"><h3>Your info</h3><label class="f">Name<input type="text" name="name" required autocomplete="name" value="${esc(c.name || '')}" data-testid="co-name"></label>
         <div class="two"><label class="f">Phone<input type="tel" name="phone" required autocomplete="tel" value="${esc(c.phone || '')}" data-testid="co-phone"></label><label class="f">Email<input type="email" name="email" autocomplete="email" value="${esc(c.email || '')}" data-testid="co-email"></label></div>
         <label class="f">Order notes<textarea name="notes" rows="2" placeholder="Anything we should know?"></textarea></label></div>
@@ -132,7 +133,7 @@
     const err = $('#payerr'); err.hidden = true;
     const pay = PAY.charge({ amount: t.total, method: d.pay, card: d.card });
     if (!pay.ok) { err.textContent = pay.error; err.hidden = false; return; }
-    LS.set('ctq_customer', { name: d.name, phone: d.phone, email: d.email, address: d.address || '' });
+    LS.set('ctq_customer', { name: d.name, phone: d.phone, email: d.email, address: '' });
     const id = String(1000 + orders().length + 1) + Math.random().toString(36).slice(2, 4).toUpperCase();
     const o = { id, created: new Date().toISOString(), status: 'new', mode: S.mode, when: d.when, customer: { name: d.name, phone: d.phone, email: d.email, address: d.address || '' }, notes: d.notes || '',
       items: S.cart.map(l => Object.assign({}, l, { lineTotal: r2(l.unit * l.qty) })), ...t, payment: pay };
@@ -145,9 +146,9 @@
   const confirmation = id => { const o = orders().find(x => x.id === id), s = settings(); if (!o) return header() + '<div class="wrap page"><div class="card">Order not found. <a href="#/">Menu</a></div></div>';
     const st = ['new', 'preparing', 'ready', 'completed'], k = st.indexOf(o.status);
     return header() + `<div class="wrap page" style="max-width:600px"><div class="card done" data-testid="confirmation"><div class="big">🎉</div><h2 style="margin:0">Thanks, ${esc(o.customer.name.split(' ')[0])}! Order #${esc(o.id)} is in.</h2>
-      <p class="mut" style="margin:0">${o.mode === 'delivery' ? `Delivery to ${esc(o.customer.address)} in about ${s.deliveryMins} min.` : `Pickup at ${esc(s.address)} in about ${s.pickupMins} min.`} ${o.when !== 'asap' ? '(' + esc(o.when) + ')' : ''}</p>
-      <div class="steps">${st.slice(0, 3).map((x, i) => `<div class="${i <= k ? 'on' : ''}"></div>`).join('')}</div><b data-testid="orderstatus">${{ new: 'Order received', preparing: 'Being made', ready: o.mode === 'delivery' ? 'On the way' : 'Ready for pickup', completed: 'Completed' }[o.status]}</b>
-      <span class="test">Test order · ${esc(o.payment.label)}${o.email && o.email.emailed ? ' · emailed to the store' : o.email && o.email.ok ? ' · the store got your order' : ''}</span></div>
+      <p class="mut" style="margin:0">Pickup at ${esc(s.address)} in about ${s.pickupMins} min. ${o.when !== 'asap' ? '(' + esc(o.when) + ')' : ''}</p>
+      <div class="steps">${st.slice(0, 3).map((x, i) => `<div class="${i <= k ? 'on' : ''}"></div>`).join('')}</div><b data-testid="orderstatus">${{ new: 'Order received', preparing: 'Being made', ready: 'Ready for pickup', completed: 'Completed' }[o.status]}</b>
+      <span class="test" data-testid="placed">Order placed · ${esc(o.payment.label)}</span></div>
       <div class="card"><h3>Receipt</h3>${o.items.map(l => `<div class="line"><div class="grow"><b>${l.qty} × ${esc(l.name)}</b>${l.mods.length ? `<small>${esc(l.mods.join(', '))}</small>` : ''}</div><b>${m(l.lineTotal)}</b></div>`).join('')}
       <div class="sum"><div><span>Subtotal</span><span>${m(o.subtotal)}</span></div><div><span>Tax</span><span>${m(o.tax)}</span></div>${o.deliveryFee ? `<div><span>Delivery</span><span>${m(o.deliveryFee)}</span></div>` : ''}${o.tip ? `<div><span>Tip</span><span>${m(o.tip)}</span></div>` : ''}<div class="tot"><span>Total</span><span>${m(o.total)}</span></div></div></div>
       <div class="card"><p style="margin:0">Questions? Call <a href="tel:${s.phone.replace(/\D/g, '')}">${esc(s.phone)}</a></p><a class="btn ghost" href="#/">Back to menu</a></div></div>`; };
@@ -161,15 +162,13 @@
     if (tab === 'orders') body = `<div class="kpis"><div><b>${today.length}</b><span class="fine">Orders today</span></div><div><b>${m(today.reduce((a, o) => a + o.total, 0))}</b><span class="fine">Sales today</span></div><div><b>${os.filter(o => o.status !== 'completed').length}</b><span class="fine">Open</span></div></div>
       <label class="switchrow" style="display:flex;gap:8px;align-items:center;font-weight:700"><input type="checkbox" data-ch="accept" ${s.acceptOrders ? 'checked' : ''}> Taking online orders</label>
       ${os.map(o => `<div class="ord" data-testid="ord-${o.id}"><div class="h"><b>#${esc(o.id)} · ${esc(o.customer.name)}</b><span class="st ${o.status}">${o.status}</span></div>
-        <span class="fine">${new Date(o.created).toLocaleString()} · ${o.mode === 'delivery' ? '🚗 ' + esc(o.customer.address) : '🛍️ Pickup'} · ${esc(o.when)} · ${esc(o.customer.phone)}</span>
+        <span class="fine">${new Date(o.created).toLocaleString()} · 🛍️ Pickup · ${esc(o.when)} · ${esc(o.customer.phone)}</span>
         <div>${o.items.map(l => `${l.qty}× ${esc(l.name)}${l.mods.length ? ' <span class="fine">(' + esc(l.mods.join(', ')) + ')</span>' : ''}${l.note ? ' <i class="fine">' + esc(l.note) + '</i>' : ''}`).join('<br>')}</div>
         ${o.notes ? `<span class="fine">Note: ${esc(o.notes)}</span>` : ''}<div class="h"><b>${m(o.total)} · ${esc(o.payment.label)}</b><span>${o.status === 'new' ? `<button class="btn sm" data-act="st" data-id="${o.id}" data-v="preparing" data-testid="accept-${o.id}">Accept</button>` : o.status === 'preparing' ? `<button class="btn sm" data-act="st" data-id="${o.id}" data-v="ready" data-testid="ready-${o.id}">Mark ready</button>` : o.status === 'ready' ? `<button class="btn sm dark" data-act="st" data-id="${o.id}" data-v="completed">Complete</button>` : ''}</span></div></div>`).join('') || '<p class="fine">No orders yet.</p>'}`;
     if (tab === 'menu') body = `<p class="fine">Change prices, hide items or mark sold out. Saved right away.</p>${S.menu.categories.map(c => `<h3 style="margin:10px 0 0">${esc(c.name)}</h3>${c.items.filter((id, i, a) => a.indexOf(id) === i).map(id => { const it = item(id); return `<div class="ed"><span>${esc(it.name)}${it.hidden ? ' <span class="badge">hidden</span>' : ''}</span><input type="number" step="0.01" value="${it.price}" data-ed="price" data-id="${id}" data-testid="price-${id}" aria-label="price"><span style="display:grid;gap:4px"><button class="btn ghost sm" data-act="so" data-id="${id}">${it.soldOut ? 'In stock' : 'Sold out'}</button><button class="btn ghost sm" data-act="hide" data-id="${id}">${it.hidden ? 'Show' : 'Hide'}</button></span></div>`; }).join('')}`).join('')}<button class="btn ghost" data-act="resetmenu">Reset menu edits</button>`;
     if (tab === 'hours') body = `<form id="setf" class="page" style="padding:0"><h3>Hours</h3>${s.hours.map((h, i) => `<div class="hrs"><b>${DAYS[i]}</b><input type="time" name="o${i}" value="${h.open}"><input type="time" name="c${i}" value="${h.close}"><label class="fine"><input type="checkbox" name="x${i}" ${h.closed ? 'checked' : ''}> Closed</label></div>`).join('')}
-      <h3>Pickup & delivery</h3><div class="two"><label class="f">Pickup time (min)<input type="number" name="pickupMins" value="${s.pickupMins}"></label><label class="f">Delivery time (min)<input type="number" name="deliveryMins" value="${s.deliveryMins}"></label>
-      <label class="f">Delivery fee<input type="number" step="0.01" name="deliveryFee" value="${s.deliveryFee}" data-testid="set-fee"></label><label class="f">Delivery minimum<input type="number" step="0.01" name="deliveryMin" value="${s.deliveryMin}"></label>
-      <label class="f">Delivery radius (mi)<input type="number" step="0.5" name="deliveryRadius" value="${s.deliveryRadius}"></label><label class="f">Sales tax %<input type="number" step="0.001" name="taxRate" value="${s.taxRate}"></label></div>
-      <label style="display:flex;gap:8px;font-weight:700"><input type="checkbox" name="deliveryOn" ${s.deliveryOn ? 'checked' : ''}> Offer delivery</label>
+      <h3>Pickup</h3><div class="two"><label class="f">Pickup time (min)<input type="number" name="pickupMins" value="${s.pickupMins}"></label><label class="f">Sales tax %<input type="number" step="0.001" name="taxRate" value="${s.taxRate}"></label></div>
+      <label class="f">DoorDash link (for delivery)<input type="text" name="doordashUrl" value="${esc(s.doordashUrl)}" data-testid="set-dd"></label>
       <button class="btn" data-testid="savesettings">Save</button></form>`;
     if (tab === 'payments') { const a = PAY.account(), pl = POS.log().slice(0, 5);
       body = `<div class="ord"><b>Stripe <span class="test">Simulated test mode</span></b>${a.status === 'connected' ? `<span>✅ Connected: ${esc(a.business)} (${esc(a.id)}) · payouts to ${esc(a.bank)}</span><button class="btn ghost sm" data-act="disc">Disconnect</button>` : a.status === 'pending' ? `<span>Step 2 of 2: add a bank for payouts (test)</span><button class="btn sm" data-act="finish" data-testid="stripe-finish">Add test bank & finish</button>` : `<span class="fine">Connect Christy's own Stripe account so card payments land in her bank. This is a simulation, no keys, no money.</span><button class="btn sm" data-act="connect" data-testid="stripe-connect">Connect with Stripe (test)</button>`}
@@ -217,7 +216,7 @@
     else if (f.id === 'login') { if (f.pin.value === settings().pin) { sessionStorage.setItem('ctq_owner', '1'); render(); } else toast('Wrong PIN'); }
     else if (f.id === 'setf') { const d = Object.fromEntries(new FormData(f)), s = settings();
       s.hours = DAYS.map((x, i) => ({ open: d['o' + i], close: d['c' + i], closed: !!d['x' + i] }));
-      ['pickupMins', 'deliveryMins', 'deliveryFee', 'deliveryMin', 'deliveryRadius', 'taxRate'].forEach(k => s[k] = +d[k]); s.deliveryOn = !!d.deliveryOn; saveSettings(s); toast('Saved'); render(); } });
+      ['pickupMins', 'taxRate'].forEach(k => s[k] = +d[k]); s.doordashUrl = d.doordashUrl; saveSettings(s); toast('Saved'); render(); } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && M) closeModal(); });
 
   window.CTQ = { totals, lineUnit, openNow };
