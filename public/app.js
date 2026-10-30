@@ -23,7 +23,7 @@
   const sent = {};
   const track = (type, once) => { if (once && sent[type]) return; sent[type] = 1; const b = JSON.stringify({ type, sid: SID, path: location.hash.slice(0, 40) });
     try { if (navigator.sendBeacon) navigator.sendBeacon('/api/track', new Blob([b], { type: 'application/json' })); else fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: b, keepalive: true }); } catch (e) {} };
-  const saveCart = () => { LS.set('ctq_cart', S.cart); LS.set('ctq_mode', S.mode); };
+  const saveCart = () => { LS.set('ctq_cart', S.cart); LS.set('ctq_mode', S.mode); setTimeout(() => window.dispatchEvent(new Event('ctq-cart')), 0); };
   const toast = t => { const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2600); };
 
   // ---------- menu with owner edits ----------
@@ -261,5 +261,14 @@
   // Old #/admin links go to the storefront; the owner dashboard lives at /owner.
   if (/^#\/admin/.test(location.hash)) history.replaceState(null, '', location.pathname);
   track('pageview');
+  // Live-now heartbeat: anonymous sid, current page and cart size. No names, no IPs stored.
+  let typed = false;
+  document.addEventListener('focusin', e => { if (e.target.closest && e.target.closest('#co')) { if (!typed) { typed = true; beat(); } } });
+  const livePage = () => { const h = location.hash || '#/'; if (h.startsWith('#/checkout')) return S.cart.length && typed ? 'checkout' : 'cart'; if (h.startsWith('#/order/') || h.startsWith('#/paid')) return 'order'; return 'menu'; };
+  const beat = () => { if (document.visibilityState === 'hidden') return; try { fetch('/api/live', { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ sid: SID, page: livePage(), items: count() }) }).catch(() => {}); } catch (e) {} };
+  window.addEventListener('hashchange', () => { if (!(location.hash || '').startsWith('#/checkout')) typed = false; setTimeout(beat, 50); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') beat(); else if (navigator.sendBeacon) navigator.sendBeacon('/api/live', new Blob([JSON.stringify({ sid: SID, gone: true })], { type: 'application/json' })); });
+  setInterval(beat, 20000); beat();
+  window.addEventListener('ctq-cart', beat);
   Promise.all([fetch('/menu.json').then(r => r.json()), fetch('/api/site').then(r => r.json()).catch(() => null)]).then(([d, c]) => { S.menu = d; if (c) S.cfg = c; render(); });
 })();

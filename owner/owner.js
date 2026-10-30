@@ -6,10 +6,10 @@
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const STATUS = { new: 'New', preparing: 'Making', ready: 'Ready', completed: 'Picked up', canceled: 'Canceled' };
   const NEXT = { new: ['preparing', 'Accept'], preparing: ['ready', 'Mark ready'], ready: ['completed', 'Picked up'] };
-  const TABS = [['orders', 'Orders', '🧾'], ['analytics', 'Stats', '📈'], ['reports', 'Reports', '📄'], ['menu', 'Menu', '🍔'], ['settings', 'Settings', '⚙️']];
+  const TABS = [['orders', 'Orders', '🧾'], ['live', 'Live', '🟢'], ['analytics', 'Stats', '📈'], ['reports', 'Reports', '📄'], ['menu', 'Menu', '🍔'], ['settings', 'Settings', '⚙️']];
   const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
   const addDays = (d, n) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
-  const S = { me: null, tab: 'orders', orders: [], filter: 'active', open: null, seen: null, unseen: 0, an: null, rep: null, from: addDays(today(), -6), to: today(), settings: null, edits: {}, menu: null, stripe: null, sheet: null, err: '' };
+  const S = { me: null, tab: 'orders', orders: [], filter: 'active', open: null, seen: null, unseen: 0, an: null, rep: null, from: addDays(today(), -6), to: today(), settings: null, edits: {}, menu: null, stripe: null, live: null, sheet: null, err: '' };
 
   const api = async (path, opt = {}) => {
     const r = await fetch(path, Object.assign({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }, opt, opt.body ? { body: JSON.stringify(opt.body) } : {}));
@@ -113,6 +113,13 @@
       ${on ? `<p class="fine">Account ${esc(st.account)}${st.connectedAt ? ' · since ' + fmtDay(st.connectedAt) : ''}</p><button class="btn ghost" data-act="disconnect" data-testid="stripe-disconnect">Disconnect</button>`
            : `<a class="btn stripe" href="/api/admin/stripe/connect" data-testid="stripe-connect">Connect with Stripe</a>`}
       ${demo ? '<p class="fine">This is a practice run. Real payouts turn on once your Stripe account is linked.</p>' : ''}</section>`; };
+  const liveTab = () => { const L = S.live; if (!L) return '<div class="empty">Loading...</div>';
+    const row = (k, l, i) => `<div class="lrow" data-testid="live-${k}"><span>${i} ${l}</span><b>${L.pages[k]}</b></div>`;
+    return `<div class="card live"><p class="fine"><span class="dot ${L.total ? 'on' : ''}"></span> Right now · updates every 10 seconds</p>
+      <div class="lbig" data-testid="live-total">${L.total}</div><p class="lsub">${L.total === 1 ? 'person' : 'people'} on your site</p></div>
+      <div class="card"><h3>Where they are</h3>${row('menu', 'Looking at the menu', '🍔')}${row('cart', 'Viewing their cart', '🛒')}${row('checkout', 'Filling out checkout', '💳')}${row('order', 'Watching their order', '🧾')}</div>
+      <div class="card"><h3>Active carts</h3><div class="lrow" data-testid="live-carts"><span>People with food in their cart</span><b>${L.carts}</b></div><div class="lrow"><span>Items in those carts</span><b data-testid="live-items">${L.cartItems}</b></div></div>
+      <p class="fine">Counts real shoppers active in the last ${L.windowSec} seconds. Bots and you (while logged in here) are not counted. Nothing personal is saved.</p>`; };
   const settings = () => { const s = S.settings; if (!s) return '<div class="empty">Loading...</div>';
     return pay() + `<form id="setf" class="card" data-testid="settings-form"><h2>Store</h2>
       <label class="tog big"><input type="checkbox" name="acceptOrders" ${s.acceptOrders ? 'checked' : ''} data-testid="set-accept"> Taking online orders</label>
@@ -120,14 +127,14 @@
       <div class="two"><label>Pickup time (min)<input type="number" name="pickupMins" min="1" max="180" value="${s.pickupMins}" data-testid="set-pickup"></label><label>Sales tax %<input type="number" step="0.001" name="taxRate" value="${s.taxRate}"></label></div>
       <label>DoorDash link<input name="doordashUrl" value="${esc(s.doordashUrl)}"></label>
       <button class="btn" data-testid="set-save">Save</button></form>
-      <div class="card"><h3>Where order alerts go</h3><p class="fine" data-testid="webhook-current">${esc(S.webhook || 'not set')}</p><p class="fine">Want alerts sent somewhere else? Ask your web person to switch it.</p></div>
+      <div class="card"><h3>Where order alerts go</h3><p class="fine" data-testid="webhook-current">${esc(S.webhook || 'not set')}</p>${S.lastAlert && S.lastAlert.at ? `<p class="fine" data-testid="last-alert">Last alert: order #${esc(S.lastAlert.order)} at ${esc(new Date(S.lastAlert.at).toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }))}: ${S.lastAlert.ok ? '✅ sent to Formspree' : '⚠️ failed (' + esc(S.lastAlert.status || 'no answer') + ') ' + esc(S.lastAlert.detail)}. Not in your inbox? Check Spam and the Formspree dashboard.</p>` : '<p class="fine" data-testid="last-alert">No order alerts sent since the last restart.</p>'}<p class="fine">Want alerts sent somewhere else? Ask your web person to switch it.</p></div>
       <div class="card"><p class="fine">Signed in as ${esc(S.me.email)}</p><button class="btn ghost" data-act="logout" data-testid="logout">Log out</button></div>`; };
 
   // ---------- shell ----------
   const render = () => { const app = $('#app');
     if (!S.me) { app.innerHTML = login(); document.title = 'Owner login'; return; }
     const o = S.open && S.orders.find(x => x.id === S.open), y = window.scrollY;
-    const body = { orders, analytics, reports, menu: menuTab, settings }[S.tab]();
+    const body = { orders, live: liveTab, analytics, reports, menu: menuTab, settings }[S.tab]();
     const nNew = S.orders.filter(x => x.status === 'new').length;
     document.title = (nNew ? `(${nNew}) ` : '') + 'Orders · Owner';
     app.innerHTML = `<header class="top"><b>Owner dashboard</b><span class="fine">Kimmie’s-Christy's Tasty Queen</span></header>
@@ -143,13 +150,14 @@
       if (S.seen && fresh.length) { chime(); toast(fresh.length === 1 ? `New order #${fresh[0].id} from ${fresh[0].customer.name}` : `${fresh.length} new orders`); }
       S.seen = true; if (!quiet || !document.activeElement || !document.activeElement.matches('input,textarea,select')) render(); } catch (e) {} };
   const loadTab = async () => { try {
+    if (S.tab === 'live') S.live = await api('/api/admin/live');
     if (S.tab === 'analytics') { S.an = null; render(); S.an = await api(`/api/admin/analytics?from=${S.from}&to=${S.to}`); }
     if (S.tab === 'reports') S.rep = await api(`/api/admin/report?from=${S.from}&to=${S.to}`);
     if (S.tab === 'menu') { if (!S.menu) S.menu = await (await fetch('/menu.json')).json(); const r = await api('/api/admin/settings'); S.edits = r.menuEdits; }
-    if (S.tab === 'settings') { const [r, st] = await Promise.all([api('/api/admin/settings'), api('/api/admin/stripe')]); S.settings = r.settings; S.webhook = r.webhook; S.stripe = st; }
+    if (S.tab === 'settings') { const [r, st] = await Promise.all([api('/api/admin/settings'), api('/api/admin/stripe')]); S.settings = r.settings; S.webhook = r.webhook; S.lastAlert = r.lastAlert; S.stripe = st; }
     render(); } catch (e) { if (S.me) toast(e.message); } };
-  let poll = null;
-  const start = async () => { render(); await loadOrders(); loadTab(); clearInterval(poll); poll = setInterval(() => { if (S.me) loadOrders(true); }, 5000); };
+  let poll = null, lpoll = null;
+  const start = async () => { render(); await loadOrders(); loadTab(); clearInterval(poll); poll = setInterval(() => { if (S.me) loadOrders(true); }, 5000); clearInterval(lpoll); lpoll = setInterval(async () => { if (S.me && S.tab === 'live' && !document.hidden) { try { S.live = await api('/api/admin/live'); if (S.tab === 'live') render(); } catch (e) {} } }, 10000); };
 
   const fromHash = () => { const h = location.hash.slice(1); const [t, q] = h.split('?'); if (t === 'pay') S.tab = 'settings'; else if (TABS.some(x => x[0] === t)) S.tab = t;
     if (q && /stripe=connected/.test(q)) setTimeout(() => toast('Stripe connected'), 300); else if (q && /stripe=/.test(q)) setTimeout(() => toast('Stripe did not connect. Try again.'), 300); };

@@ -93,7 +93,7 @@ function buildEmail(o, to = pickTo()) {
 }
 function webhookFields(o) {
   const c = o.customer || {};
-  const f = { _subject: `${NAME}: new ${o.mode || 'pickup'} order #${clean(o.id)}`, order: '#' + clean(o.id),
+  const f = { _subject: `${NAME}: new ${o.mode || 'pickup'} order #${clean(o.id)} (${new Date(o.created || Date.now()).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })})`, order: '#' + clean(o.id),
     items: (o.items || []).map(i => `${i.qty} x ${clean(i.name)}${i.mods && i.mods.length ? ' (' + i.mods.map(x => clean(x)).join(', ') + ')' : ''}${i.note ? ' [Note: ' + clean(i.note) + ']' : ''} ${money(i.lineTotal)}`).join(' | '),
     total: `${money(o.total)} (subtotal ${money(o.subtotal)}, tax ${money(o.tax)}${o.tip ? ', tip ' + money(o.tip) : ''})`,
     name: clean(c.name), phone: clean(c.phone), pickup_time: o.when === 'asap' || !o.when ? 'ASAP' : clean(o.when),
@@ -106,10 +106,13 @@ async function sendWebhook(o) {
   const r = await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(webhookFields(o)), signal: AbortSignal.timeout(15000) });
   return { status: r.status, body: await r.json().catch(() => ({})) };
 }
+const lastAlert = { at: '', order: '', ok: null, status: 0, detail: '' }; // in memory, shown in owner Settings
 async function notify(o) {
   try {
-    const w = await sendWebhook(o);
-    console.log('[webhook]', WEBHOOK_URL, w.status, JSON.stringify(w.body));
+    let w; for (let i = 0; i < 3; i++) { try { w = await sendWebhook(o); } catch (e) { w = { status: 0, body: { error: e.message } }; }
+      console.log('[webhook]', 'order', o.id, 'try', i + 1, WEBHOOK_URL, w.status, JSON.stringify(w.body));
+      if ((w.status >= 200 && w.status < 300) || (w.status >= 400 && w.status < 500 && w.status !== 429) || env.WEBHOOK_OFF === '1') break; await new Promise(r => setTimeout(r, 1500 * (i + 1))); }
+    Object.assign(lastAlert, { at: new Date().toISOString(), order: o.id, ok: w.status >= 200 && w.status < 300 && w.body.ok !== false, status: w.status, detail: String((w.body && (w.body.error || (w.body.errors && JSON.stringify(w.body.errors)))) || (w.body && w.body.ok ? 'Formspree accepted it' : '')).slice(0, 200) });
     const ok = w.status >= 200 && w.status < 300 && w.body.ok !== false;
     if (ok || !transport) return Object.assign({ ok: true, emailed: ok, via: 'formspree', status: w.status, formspree: w.body }, ok || !w.status ? {} : { browserSend: { url: WEBHOOK_URL, fields: webhookFields(o) } });
   } catch (err) { console.error('Webhook failed:', err.message); }
@@ -158,6 +161,25 @@ app.post('/api/track', async (req, res) => {
   await store.addEvent({ at: new Date().toISOString(), type, sid: String(sid), path: clean(req.body.path, 80) }).catch(() => {});
   res.status(204).end();
 });
+
+// ---------- live visitors (in memory only, anonymous) ----------
+// Storefront JS sends a heartbeat every ~20s. A visitor counts as live if seen in the last 60s.
+const LIVE_MS = 60000, LIVE_PAGES = new Set(['menu', 'cart', 'checkout', 'order']);
+const live = new Map(); // sid -> { page, items, at }
+const BOT_UA = /bot|crawl|spider|slurp|preview|fetch|curl|wget|python|httpclient|axios|node-fetch|go-http|java\/|okhttp|headless|phantom|puppeteer|playwright|lighthouse|pingdom|uptime|monitor|facebookexternalhit|embedly|whatsapp|discord|telegram/i;
+const liveHits = new Map();
+app.post('/api/live', (req, res) => {
+  const ua = String(req.headers['user-agent'] || ''), b = req.body || {}, sid = String(b.sid || ''), ip = ipOf(req), now = Date.now();
+  const h = (liveHits.get(ip) || []).filter(t => now - t < 60000); h.push(now); liveHits.set(ip, h);
+  if (h.length > 60 || !ua || BOT_UA.test(ua) || getSession(req) || !/^[a-z0-9]{8,40}$/i.test(sid)) return res.status(204).end();
+  if (b.gone) { live.delete(sid); return res.status(204).end(); }
+  if (!LIVE_PAGES.has(b.page)) return res.status(204).end();
+  if (!live.has(sid) && live.size > 5000) return res.status(204).end();
+  live.set(sid, { page: b.page, items: Math.max(0, Math.min(99, parseInt(b.items, 10) || 0)), at: now });
+  res.status(204).end();
+});
+const pruneLive = () => { const now = Date.now(); for (const [k, v] of live) if (now - v.at > LIVE_MS) live.delete(k); for (const [k, v] of liveHits) if (!v.some(t => now - t < 60000)) liveHits.delete(k); };
+setInterval(pruneLive, 15000).unref();
 
 const orderHits = new Map();
 app.post('/api/orders', async (req, res) => {
@@ -303,7 +325,10 @@ app.get('/api/admin/export/:kind.csv', async (req, res) => {
 });
 
 // ---------- menu, hours, settings ----------
-app.get('/api/admin/settings', async (req, res) => res.json({ ok: true, settings: await getSettings(), menuEdits: await getEdits(), webhook: WEBHOOK_URL, pos: POS.labels }));
+app.get('/api/admin/live', (req, res) => { pruneLive(); const pages = { menu: 0, cart: 0, checkout: 0, order: 0 }; let carts = 0, items = 0;
+  for (const v of live.values()) { pages[v.page]++; if (v.items > 0) { carts++; items += v.items; } }
+  res.json({ ok: true, now: new Date().toISOString(), windowSec: LIVE_MS / 1000, total: live.size, pages, carts, cartItems: items }); });
+app.get('/api/admin/settings', async (req, res) => res.json({ ok: true, settings: await getSettings(), menuEdits: await getEdits(), webhook: WEBHOOK_URL, lastAlert, pos: POS.labels }));
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 app.put('/api/admin/settings', async (req, res) => {
   const cur = await getSettings(), b = req.body || {}, n = Object.assign({}, cur);
