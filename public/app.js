@@ -118,7 +118,7 @@
   const modalValid = it => (it.modifiers || []).every(g => !g.required || (M.sel[g.id] || []).length);
   const fromPrice = it => it.price + (it.modifiers || []).filter(x => x.required && x.type === 'single' && x.options.length).reduce((s, x) => s + Math.min(...x.options.map(o => +o.price || 0)), 0);
   const renderModal = () => { const it = item(M.id), unit = lineUnit(it, M.sel), ok = modalValid(it);
-    $('#modal').hidden = false; document.body.style.overflow = 'hidden';
+    modalY = window.scrollY; $('#modal').hidden = false; document.body.style.overflow = 'hidden';
     $('#modal').innerHTML = `<div class="sheet" role="dialog" aria-label="${esc(it.name)}" data-testid="itemmodal">
       <div class="grab"></div><div class="img">${it.image ? `<div class="ph" style="background-image:url('/${it.image}')"></div>` : fallback(it, true)}<button class="x" data-act="close" aria-label="Close">×</button></div>
       <div class="bd"><div><h3>${esc(it.name)}</h3><p class="d">${esc(it.description)}</p><b>${fromPrice(it) > it.price ? 'From ' + m(fromPrice(it)) : m(it.price)}</b></div>
@@ -127,7 +127,8 @@
       <label class="f">Special requests<textarea rows="2" data-in="note" placeholder="No onions, extra pickles...">${esc(M.note)}</textarea></label></div>
       <div class="sbar"><div class="qty"><button data-act="mq" data-d="-1" aria-label="less">−</button><b data-testid="mqty">${M.qty}</b><button data-act="mq" data-d="1" aria-label="more">+</button></div>
       <button class="btn grow" data-act="add" data-testid="addtocart" ${ok ? '' : 'disabled'}>${ok ? 'Add to order · ' + m(unit * M.qty) : 'Pick the required options'}</button></div></div>`; };
-  const closeModal = () => { $('#modal').hidden = true; $('#modal').innerHTML = ''; document.body.style.overflow = ''; M = null; };
+  let modalY = 0;
+  const closeModal = () => { $('#modal').hidden = true; $('#modal').innerHTML = ''; document.body.style.overflow = ''; M = null; keepY(modalY); };
   const addToCart = () => { const it = item(M.id), mods = []; (it.modifiers || []).forEach(g => (M.sel[g.id] || []).forEach(oi => { const o = g.options[oi]; if (o && !(o.price === 0 && /^No /.test(o.name))) mods.push(o.name); }));
     S.cart.push({ id: M.id, name: it.name, qty: M.qty, unit: lineUnit(it, M.sel), mods, note: M.note.trim() }); saveCart(); closeModal(); toast('Added ' + it.name); track('addtocart'); render(); };
 
@@ -220,20 +221,27 @@
       <div class="card"><p style="margin:0">Questions? Call <a href="tel:${s.phone.replace(/\D/g, '')}">${esc(s.phone)}</a></p><a class="btn ghost" href="#/">Back to menu</a></div></div>`; };
 
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -40px 0px' }) : null;
-  const reveal = () => document.querySelectorAll('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('in'));
+  // Reveal animations play once per visit. Re-renders (add to cart, qty, chips) must not blank and re-fade the page.
+  let revealedOnce = false; const seenRoutes = new Set();
+  const reveal = () => { const r = (location.hash || '#/').split('?')[0]; const again = seenRoutes.has(r); seenRoutes.add(r);
+    document.querySelectorAll('.reveal').forEach(el => { if (again || !io) el.classList.add('in', 'now'); else io.observe(el); }); };
+  const keepY = y => { const h = document.documentElement, b = h.style.scrollBehavior; h.style.scrollBehavior = 'auto'; window.scrollTo(0, y); h.style.scrollBehavior = b; };
   // ---------- router ----------
+  let lastRoute = null;
   const render = () => { const h = location.hash || '#/'; let html;
     if (h.startsWith('#/paid')) { $('#app').innerHTML = header() + '<div class="wrap page"><div class="card" data-testid="paying">Finishing your order...</div></div>'; finishPaid(); return; }
     if (h.startsWith('#/checkout')) html = checkout(); else if (h.startsWith('#/order/')) html = confirmation(h.slice(8)); else html = store();
     if (h.startsWith('#/checkout') && S.cart.length) track('checkout', true);
     const old = $('#co'), keep = old ? [...old.elements].filter(x => x.name && x.type !== 'radio').map(x => [x.name, x.value]) : null;
+    const route = h.split('?')[0], sameRoute = route === lastRoute, y = window.scrollY; lastRoute = route;
     $('#app').innerHTML = html;
-    reveal();
+    reveal(); if (sameRoute) keepY(y);
     mountStripe(); watchMenu();
     const nf = $('#co'); if (keep && nf) keep.forEach(([k, v]) => { const x = nf.elements[k]; if (x && x.type !== 'radio' && x.tagName !== 'BUTTON') x.value = v; }); };
-  window.addEventListener('hashchange', () => { if (!/^#c-|^#menu/.test(location.hash)) { render(); scrollTo(0, 0); } });
+  window.addEventListener('hashchange', () => { if (!/^#c-|^#menu/.test(location.hash)) { const was = lastRoute; render(); if (lastRoute !== was) keepY(0); } });
 
   document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (!el) { if (e.target.id === 'modal') closeModal(); return; } const a = el.dataset.act, s = settings();
+    if (el.tagName === 'BUTTON' && el.type === 'submit') e.preventDefault(); // action buttons inside the checkout form must not submit it
     if (a === 'open') openItem(el.dataset.id); else if (a === 'close') closeModal(); else if (a === 'add') addToCart();
     else if (a === 'mq') { M.qty = Math.max(1, M.qty + +el.dataset.d); renderModal(); }
     else if (a === 'mode') { S.mode = el.dataset.v; saveCart(); render(); }
