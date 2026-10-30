@@ -54,7 +54,7 @@
   const itemCard = (id, popular) => { const it = item(id); if (!it || it.hidden) return ''; const so = it.soldOut;
     return `<button class="item ${popular ? 'popc' : ''} ${so ? 'sold' : ''}" data-act="open" data-id="${id}" data-testid="item-${id}" ${so ? 'disabled' : ''}>
       ${photo(it)}<span class="plus" aria-hidden="true">+</span>${DDR[id] ? `<span class="rate">👍 ${DDR[id]}</span>` : ''}
-      <div class="t"><h4>${esc(it.name)}</h4>${popular ? '' : `<p>${esc(it.description)}</p>`}<div class="pr">${it.price < 0.5 && it.modifiers.length ? 'From ' : ''}${m(it.price)} ${so ? '<span class="badge">Sold out</span>' : ''}</div></div></button>`; };
+      <div class="t"><h4>${esc(it.name)}</h4>${popular ? '' : `<p>${esc(it.description)}</p>`}<div class="pr">${fromPrice(it) > it.price ? 'From ' + m(fromPrice(it)) : m(it.price)} ${so ? '<span class="badge">Sold out</span>' : ''}</div></div></button>`; };
 
   const directBox = () => `<section class="direct reveal" data-testid="whydirect"><div><span class="kicker">Why order direct?</span><h2>Skip the app. Order from us.</h2></div><ul>
     <li><span>🏡</span><div><b>Support a local spot.</b> Your order goes straight to a Turner neighborhood favorite, not a big app.</div></li>
@@ -110,6 +110,7 @@
     (it.modifiers || []).forEach(g => { M.sel[g.id] = g.type === 'single' && g.required ? [] : (g.type === 'single' ? [0] : []); });
     renderModal(); };
   const modalValid = it => (it.modifiers || []).every(g => !g.required || (M.sel[g.id] || []).length);
+  const fromPrice = it => it.price + (it.modifiers || []).filter(x => x.required && x.type === 'single' && x.options.length).reduce((s, x) => s + Math.min(...x.options.map(o => +o.price || 0)), 0);
   const renderModal = () => { const it = item(M.id), unit = lineUnit(it, M.sel), ok = modalValid(it);
     $('#modal').hidden = false; document.body.style.overflow = 'hidden';
     $('#modal').innerHTML = `<div class="sheet" role="dialog" aria-label="${esc(it.name)}" data-testid="itemmodal">
