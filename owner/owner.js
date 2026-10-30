@@ -9,7 +9,7 @@
   const TABS = [['orders', 'Orders', '🧾'], ['analytics', 'Stats', '📈'], ['reports', 'Reports', '📄'], ['menu', 'Menu', '🍔'], ['settings', 'Settings', '⚙️']];
   const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
   const addDays = (d, n) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
-  const S = { me: null, tab: 'orders', orders: [], filter: 'active', open: null, seen: null, unseen: 0, range: 'today', an: null, rep: null, from: addDays(today(), -6), to: today(), settings: null, edits: {}, menu: null, stripe: null, sheet: null, err: '' };
+  const S = { me: null, tab: 'orders', orders: [], filter: 'active', open: null, seen: null, unseen: 0, an: null, rep: null, from: addDays(today(), -6), to: today(), settings: null, edits: {}, menu: null, stripe: null, sheet: null, err: '' };
 
   const api = async (path, opt = {}) => {
     const r = await fetch(path, Object.assign({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }, opt, opt.body ? { body: JSON.stringify(opt.body) } : {}));
@@ -67,24 +67,30 @@
     ${o.refunds && o.refunds.length ? `<div class="card"><h3>Refunds</h3>${o.refunds.map(r => `<div class="row fine"><span>${fmtDay(r.at)} ${fmtTime(r.at)}${r.reason ? ' · ' + esc(r.reason) : ''}</span><b>${m(r.amount)}</b></div>`).join('')}</div>` : ''}
     <div class="card"><h3>History</h3>${(o.log || []).map(l => `<div class="row fine"><span>${fmtTime(l.at)}</span><span>${l.status === 'refund' ? 'Refund ' + m(l.amount) : STATUS[l.status] || esc(l.status)}${l.note ? ': ' + esc(l.note) : ''}</span></div>`).join('')}</div></div>`; };
 
+  const PRESETS = [['today', 'Today', 0, 0], ['yesterday', 'Yesterday', -1, -1], ['7d', 'Last 7 days', -6, 0], ['30d', 'Last 30 days', -29, 0]];
+  const nice = d => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
+  const rangeLabel = () => S.from === S.to ? nice(S.from) : nice(S.from) + ' to ' + nice(S.to);
+  const rangePicker = () => { const t = today(); const cur = (PRESETS.find(([, , a, b]) => S.from === addDays(t, a) && S.to === addDays(t, b)) || [])[0];
+    return `<form id="rangef" class="card" data-testid="range-picker"><div class="chips">${PRESETS.map(([k, l]) => `<button type="button" class="chip ${cur === k ? 'on' : ''}" data-act="preset" data-v="${k}" data-testid="preset-${k}">${l}</button>`).join('')}</div>
+      <div class="two"><label>Start<input type="date" name="from" value="${S.from}" max="${t}" required data-testid="rep-from"></label><label>End<input type="date" name="to" value="${S.to}" max="${t}" required data-testid="rep-to"></label></div>
+      <button class="btn" data-testid="rep-run">Show these days</button><p class="fine" data-testid="range-label">Showing ${esc(rangeLabel())} · Kansas City time</p></form>`; };
   // ---------- analytics ----------
   const bars = (rows, testid) => { const mx = Math.max(1, ...rows.map(r => r[1])); return `<div class="bars" data-testid="${testid}">${rows.map(([l, v, t]) => `<div class="bar"><span>${esc(l)}</span><div><i style="width:${Math.max(2, v / mx * 100)}%"></i></div><b>${t != null ? t : v}</b></div>`).join('')}</div>`; };
   const analytics = () => { const a = S.an;
-    const rg = `<div class="chips">${[['today', 'Today'], ['7d', '7 days'], ['30d', '30 days']].map(([k, l]) => `<button class="chip ${S.range === k ? 'on' : ''}" data-act="range" data-v="${k}" data-testid="range-${k}">${l}</button>`).join('')}</div>`;
+    const rg = rangePicker();
     if (!a) return rg + '<div class="empty">Loading...</div>';
     const hours = a.byHour.map((v, h) => [h, v]).filter(([h, v]) => v || (h >= 9 && h <= 20)).map(([h, v]) => [(h % 12 || 12) + (h < 12 ? 'a' : 'p'), v]);
     return rg + `<div class="kpis"><div class="kpi"><small>Revenue</small><b data-testid="kpi-revenue">${m(a.revenue)}</b></div><div class="kpi"><small>Orders</small><b data-testid="kpi-orders">${a.orders}</b></div>
-      <div class="kpi"><small>Avg order</small><b data-testid="kpi-avg">${m(a.avgOrder)}</b></div><div class="kpi"><small>Refunds</small><b data-testid="kpi-refunds">${m(a.refunds)}</b><small>${a.refundCount} orders</small></div><div class="kpi"><small>Canceled</small><b data-testid="kpi-canceled">${a.canceled}</b></div><div class="kpi"><small>Conversion</small><b data-testid="kpi-conv">${a.conversion}%</b><small>visitors who ordered</small></div></div>
+      <div class="kpi"><small>Avg order</small><b data-testid="kpi-avg">${m(a.avgOrder)}</b></div><div class="kpi"><small>Refunds</small><b data-testid="kpi-refunds">${m(a.refunds)}</b><small>${a.refundCount} orders</small></div><div class="kpi"><small>Canceled</small><b data-testid="kpi-canceled">${a.canceled}</b></div><div class="kpi"><small>Conversion</small><b data-testid="kpi-conv">${a.conversion}%</b><small>orders ÷ visitors</small></div></div>
       <div class="card"><h3>Top items</h3>${a.topItems.length ? bars(a.topItems.map(i => [i.item, i.sales, `${i.qty} · ${m(i.sales)}`]), 'top-items') : '<p class="fine">No sales yet.</p>'}</div>
       <div class="card"><h3>Orders by hour</h3>${bars(hours, 'by-hour')}</div>
-      <div class="card"><h3>Visitors to orders</h3><p class="fine">People, not clicks. Counted on this site only, no outside trackers. ${a.pageViews} page views.</p>${bars(a.funnel.map(([l, v]) => [l, v]), 'funnel')}</div>
+      <div class="card"><h3>Visitors to orders</h3><p class="fine">Counted on this site only, no outside trackers. ${a.pageViews} page views.</p>${bars(a.funnel.map(([l, v]) => [l, v]), 'funnel')}</div>
       <p class="fine">Revenue counts what you keep: totals minus refunds, canceled orders left out.</p>`; };
 
   // ---------- reports ----------
   const reports = () => { const r = S.rep, s = r && r.summary, q = `from=${S.from}&to=${S.to}`;
-    return `<form id="repf" class="card"><div class="two"><label>From<input type="date" name="from" value="${S.from}" data-testid="rep-from"></label><label>To<input type="date" name="to" value="${S.to}" data-testid="rep-to"></label></div>
-      <div class="chips">${[['Today', 0, 0], ['Yesterday', -1, -1], ['Last 7', -6, 0], ['Last 30', -29, 0]].map(([l, a, b]) => `<button type="button" class="chip" data-act="preset" data-a="${a}" data-b="${b}">${l}</button>`).join('')}</div><button class="btn" data-testid="rep-run">Show report</button></form>
-    ${s ? `<div class="card" data-testid="report"><h3>${r.from === r.to ? esc(r.from) : esc(r.from) + ' to ' + esc(r.to)}</h3>
+    return `${rangePicker()}
+    ${s ? `<div class="card" data-testid="report"><h3>${esc(r.from === r.to ? nice(r.from) : nice(r.from) + ' to ' + nice(r.to))}</h3>
       <div class="sum"><div><span>Orders</span><span data-testid="rep-orders">${s.orders}</span></div><div><span>Canceled</span><span>${s.canceled}</span></div><div><span>Sales (food)</span><span data-testid="rep-subtotal">${m(s.subtotal)}</span></div><div><span>Tax collected</span><span>${m(s.tax)}</span></div><div><span>Tips</span><span>${m(s.tips)}</span></div><div><span>Gross</span><span data-testid="rep-gross">${m(s.gross)}</span></div><div class="red"><span>Refunds</span><span data-testid="rep-refunds">−${m(s.refunds)}</span></div><div class="tot"><span>Net</span><span data-testid="rep-net">${m(s.revenue)}</span></div><div><span>Card fees (est.)</span><span>${m(s.cardFees)}</span></div></div>
       ${Object.entries(s.byPayment).map(([k, v]) => `<div class="row fine"><span>${esc(k)}</span><span>${v.orders} · ${m(v.total)}</span></div>`).join('')}</div>
       <div class="card"><h3>Item sales</h3>${s.items.length ? s.items.map(i => `<div class="row"><span>${esc(i.item)}</span><span>${i.qty} · <b>${m(i.sales)}</b></span></div>`).join('') : '<p class="fine">Nothing sold in this range.</p>'}</div>` : ''}
@@ -137,7 +143,7 @@
       if (S.seen && fresh.length) { chime(); toast(fresh.length === 1 ? `New order #${fresh[0].id} from ${fresh[0].customer.name}` : `${fresh.length} new orders`); }
       S.seen = true; if (!quiet || !document.activeElement || !document.activeElement.matches('input,textarea,select')) render(); } catch (e) {} };
   const loadTab = async () => { try {
-    if (S.tab === 'analytics') { S.an = null; render(); S.an = await api('/api/admin/analytics?range=' + S.range); }
+    if (S.tab === 'analytics') { S.an = null; render(); S.an = await api(`/api/admin/analytics?from=${S.from}&to=${S.to}`); }
     if (S.tab === 'reports') S.rep = await api(`/api/admin/report?from=${S.from}&to=${S.to}`);
     if (S.tab === 'menu') { if (!S.menu) S.menu = await (await fetch('/menu.json')).json(); const r = await api('/api/admin/settings'); S.edits = r.menuEdits; }
     if (S.tab === 'settings') { const [r, st] = await Promise.all([api('/api/admin/settings'), api('/api/admin/stripe')]); S.settings = r.settings; S.webhook = r.webhook; S.stripe = st; }
@@ -155,8 +161,7 @@
     else if (a === 'close') { S.open = null; render(); }
     else if (a === 'sheet') { S.sheet = S.sheet === el.dataset.v ? null : el.dataset.v; render(); const f = $(S.sheet === 'cancel' ? '#cancelf input' : '#refundf'); if (f) f.scrollIntoView({ block: 'center' }); }
     else if (a === 'status') { el.disabled = true; const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/status`, { method: 'POST', body: { status: el.dataset.v } }); upd(r.order); toast(STATUS[r.order.status]); }
-    else if (a === 'range') { S.range = el.dataset.v; loadTab(); }
-    else if (a === 'preset') { S.from = addDays(today(), +el.dataset.a); S.to = addDays(today(), +el.dataset.b); loadTab(); }
+    else if (a === 'preset') { const p = PRESETS.find(x => x[0] === el.dataset.v); S.from = addDays(today(), p[2]); S.to = addDays(today(), p[3]); S.rep = null; S.an = null; render(); loadTab(); }
     else if (a === 'resetmenu') { if (!confirm('Put every price and item back the way it was?')) return; await api('/api/admin/menu', { method: 'DELETE' }); toast('Menu reset'); loadTab(); }
     else if (a === 'disconnect') { if (!confirm('Disconnect Stripe? Card orders stop until you connect again.')) return; await api('/api/admin/stripe/disconnect', { method: 'POST' }); toast('Stripe disconnected'); loadTab(); }
     else if (a === 'logout') { await api('/api/owner/logout', { method: 'POST' }); S.me = null; S.orders = []; S.seen = null; clearInterval(poll); render(); }
@@ -172,7 +177,7 @@
       if (f.id === 'loginf') { S.email = d.email; await api('/api/owner/login', { method: 'POST', body: { email: d.email, password: d.password } }); S.err = ''; S.me = await api('/api/admin/me'); start(); return; }
       if (f.id === 'cancelf') { const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/cancel`, { method: 'POST', body: { reason: d.reason } }); upd(r.order); toast('Order canceled'); }
       if (f.id === 'refundf') { const full = d.kind === 'full'; if (!full && !(+d.amount > 0)) throw new Error('Enter an amount.'); const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/refund`, { method: 'POST', body: { full, amount: +d.amount, reason: d.reason } }); upd(r.order); toast('Refunded ' + m(r.order.refunds[r.order.refunds.length - 1].amount)); }
-      if (f.id === 'repf') { S.from = d.from; S.to = d.to; await loadTab(); }
+      if (f.id === 'rangef') { let a = d.from || today(), b = d.to || a; if (a > b) [a, b] = [b, a]; S.from = a; S.to = b; S.rep = null; S.an = null; render(); await loadTab(); }
       if (f.id === 'setf') { const body = { hours: DAYS.map((x, i) => ({ open: d['o' + i], close: d['c' + i], closed: !!d['x' + i] })), pickupMins: +d.pickupMins, taxRate: +d.taxRate, doordashUrl: d.doordashUrl, acceptOrders: !!d.acceptOrders };
         const r = await api('/api/admin/settings', { method: 'PUT', body }); S.settings = r.settings; toast('Saved. Customers see it now.'); render(); }
     } catch (er) { if (f.id === 'loginf') { S.err = er.status === 429 ? er.message : (er.message || 'Wrong email or password.'); render(); const pw = $('[data-testid=login-pass]'); if (pw) pw.focus(); } else toast(er.message); }

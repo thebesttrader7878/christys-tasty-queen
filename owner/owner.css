@@ -35,3 +35,4 @@ label{display:block;font-size:.9rem;font-weight:600;margin:0 0 10px}input:not([t
 .pay h2{font-size:1.4rem}.demo{display:inline-block;background:#fff1c7;color:#7a5600;font:700 .8rem system-ui;padding:4px 10px;border-radius:999px;margin-bottom:10px}
 .pstat{font:800 1.15rem system-ui;margin:4px 0}.pstat.on{color:var(--ok)}
 #toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;opacity:0;transition:.2s;z-index:20;pointer-events:none;max-width:90vw}#toast.on{opacity:1;transform:translate(-50%,0)}
+#rangef .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:visible;flex-wrap:wrap}#rangef .chip{width:100%;text-align:center;margin:0}@media(min-width:640px){#rangef .chips{grid-template-columns:repeat(4,1fr)}}

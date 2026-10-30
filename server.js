@@ -253,22 +253,21 @@ async function ordersBetween(fromDate, toDate) { // local dates, inclusive
   return (await store.listOrders({ from, to })).filter(o => { const d = localParts(o.created).date; return d >= fromDate && d <= toDate; });
 }
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const rangeQ = q => { let to = DATE_RE.test(q.to || '') ? q.to : todayLocal(); let from = DATE_RE.test(q.from || '') ? q.from : addDays(to, -6); if (from > to) [from, to] = [to, from]; if (from < addDays(to, -365)) from = addDays(to, -365); return [from, to]; };
 app.get('/api/admin/analytics', async (req, res) => {
-  const range = ['today', '7d', '30d'].includes(req.query.range) ? req.query.range : 'today';
-  const to = todayLocal(), from = range === 'today' ? to : addDays(to, range === '7d' ? -6 : -29);
+  let from, to, range = 'custom';
+  if (req.query.from || req.query.to) [from, to] = rangeQ(req.query);
+  else { range = ['today', '7d', '30d'].includes(req.query.range) ? req.query.range : 'today'; to = todayLocal(); from = range === 'today' ? to : addDays(to, range === '7d' ? -6 : -29); }
   const orders = await ordersBetween(from, to), s = summarize(orders);
   const byHour = Array(24).fill(0); orders.forEach(o => byHour[localParts(o.created).hour]++);
   const evFrom = new Date(new Date(from + 'T00:00:00Z').getTime() - 864e5).toISOString();
   const evs = (await store.listEvents({ from: evFrom })).filter(e => { const d = localParts(e.at).date; return d >= from && d <= to; });
   const uniq = t => new Set(evs.filter(e => e.type === t).map(e => e.sid)).size;
   const views = evs.filter(e => e.type === 'pageview').length, visitors = uniq('pageview');
-  // Funnel counts people (browsers), not clicks. "Ordered" = visitors who placed at least one order on the site.
-  const orderedSids = new Set(orders.map(o => o.sid).filter(Boolean)).size;
-  const funnel = [['Visitors', visitors], ['Viewed menu', uniq('menuview')], ['Added to cart', uniq('addtocart')], ['Started checkout', uniq('checkout')], ['Ordered', orderedSids]];
-  res.json({ ok: true, range, from, to, pageViews: views, visitors, funnel, conversion: visitors ? Math.min(100, r2(orderedSids / visitors * 100)) : 0, byHour,
+  const funnel = [['Visitors', visitors], ['Viewed menu', uniq('menuview')], ['Added to cart', uniq('addtocart')], ['Started checkout', uniq('checkout')], ['Ordered', orders.length]];
+  res.json({ ok: true, range, from, to, pageViews: views, visitors, funnel, conversion: visitors ? r2(orders.length / visitors * 100) : 0, byHour,
     revenue: s.revenue, orders: s.orders, avgOrder: s.avgOrder, refunds: s.refunds, refundCount: s.refundCount, canceled: s.canceled, topItems: s.items.slice(0, 8) });
 });
-const rangeQ = q => { const to = DATE_RE.test(q.to || '') ? q.to : todayLocal(); const from = DATE_RE.test(q.from || '') ? q.from : addDays(to, -6); return from <= to ? [from, to] : [to, from]; };
 app.get('/api/admin/report', async (req, res) => { const [from, to] = rangeQ(req.query); const orders = await ordersBetween(from, to); res.json({ ok: true, from, to, summary: summarize(orders) }); });
 const csvCell = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 const csv = rows => rows.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
