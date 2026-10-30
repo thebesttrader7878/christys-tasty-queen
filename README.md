@@ -3,6 +3,8 @@
 Small Express app: serves `public/` and `POST /api/orders` (emails each order).
 
 Run locally: `npm install && npm start` then open http://localhost:3000
+
+Live: https://kimmies-christys-tasty-queen.onrender.com
 Owner dashboard: `#/admin`, demo PIN 1234.
 Test card: 4242 4242 4242 4242 (4000 0000 0000 0002 = decline). All payments simulated.
 

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: christys-tasty-queen
+    name: kimmies-christys-tasty-queen
     runtime: node
     plan: free
     buildCommand: npm install

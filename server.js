@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DEFAULT_TO = 'keys4cash.io@gmail.com';
 const ENV_TO = (process.env.ORDER_EMAIL_TO || '').trim();
-const SITE_URL = process.env.SITE_URL || 'https://christys-tasty-queen.onrender.com';
+const SITE_URL = process.env.SITE_URL || 'https://kimmies-christys-tasty-queen.onrender.com';
 const EMAIL_RE = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[a-z]{2,}$/i;
 // SMTP fallback recipient: ORDER_EMAIL_TO, else the default. Never from the browser.
 const pickTo = () => (EMAIL_RE.test(ENV_TO) ? ENV_TO : DEFAULT_TO);
