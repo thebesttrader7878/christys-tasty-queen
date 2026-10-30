@@ -121,6 +121,10 @@
       <label>DoorDash link<input name="doordashUrl" value="${esc(s.doordashUrl)}"></label>
       <button class="btn" data-testid="set-save">Save</button></form>
       <div class="card"><h3>Where order alerts go</h3><p class="fine" data-testid="webhook-current">${esc(S.webhook || 'not set')}</p><p class="fine">Want alerts sent somewhere else? Ask your web person to switch it.</p></div>
+      <div class="card" data-testid="push-card"><h3>Phone alerts</h3>${S.push && S.push.ready ? `<p class="fine">Get a buzz on your phone for every new order. Free.</p>
+      <ol class="steps"><li>Install the free <b>ntfy</b> app (App Store or Google Play).</li><li>Open this link on your phone, or in the app tap + and type the topic below: <a href="${esc(S.push.url)}" target="_blank" rel="noopener" data-testid="push-link">Subscribe to alerts</a></li><li>Tap <b>Send test alert</b> and check your phone.</li></ol>
+      <p class="fine">Topic: <code data-testid="push-topic">${esc(S.push.topic)}</code><br>Keep it private. Anyone with it can see order alerts.</p>
+      <button class="btn" data-act="pushtest" data-testid="push-test">Send test alert</button>` : '<div class="pstat" data-testid="push-status">⚪ Not set up yet</div><p class="fine">Ask your web person to turn on phone alerts.</p>'}</div>
       <div class="card"><p class="fine">Signed in as ${esc(S.me.email)}</p><button class="btn ghost" data-act="logout" data-testid="logout">Log out</button></div>`; };
 
   // ---------- shell ----------
@@ -146,7 +150,7 @@
     if (S.tab === 'analytics') { S.an = null; render(); S.an = await api(`/api/admin/analytics?from=${S.from}&to=${S.to}`); }
     if (S.tab === 'reports') S.rep = await api(`/api/admin/report?from=${S.from}&to=${S.to}`);
     if (S.tab === 'menu') { if (!S.menu) S.menu = await (await fetch('/menu.json')).json(); const r = await api('/api/admin/settings'); S.edits = r.menuEdits; }
-    if (S.tab === 'settings') { const [r, st] = await Promise.all([api('/api/admin/settings'), api('/api/admin/stripe')]); S.settings = r.settings; S.webhook = r.webhook; S.stripe = st; }
+    if (S.tab === 'settings') { const [r, st] = await Promise.all([api('/api/admin/settings'), api('/api/admin/stripe')]); S.settings = r.settings; S.webhook = r.webhook; S.stripe = st; S.push = await api('/api/admin/push').catch(() => null); }
     render(); } catch (e) { if (S.me) toast(e.message); } };
   let poll = null;
   const start = async () => { render(); await loadOrders(); loadTab(); clearInterval(poll); poll = setInterval(() => { if (S.me) loadOrders(true); }, 5000); };
@@ -164,6 +168,7 @@
     else if (a === 'preset') { const p = PRESETS.find(x => x[0] === el.dataset.v); S.from = addDays(today(), p[2]); S.to = addDays(today(), p[3]); S.rep = null; S.an = null; render(); loadTab(); }
     else if (a === 'resetmenu') { if (!confirm('Put every price and item back the way it was?')) return; await api('/api/admin/menu', { method: 'DELETE' }); toast('Menu reset'); loadTab(); }
     else if (a === 'disconnect') { if (!confirm('Disconnect Stripe? Card orders stop until you connect again.')) return; await api('/api/admin/stripe/disconnect', { method: 'POST' }); toast('Stripe disconnected'); loadTab(); }
+    else if (a === 'pushtest') { el.disabled = true; await api('/api/admin/push/test', { method: 'POST' }); toast('Test alert sent. Check your phone.'); el.disabled = false; }
     else if (a === 'logout') { await api('/api/owner/logout', { method: 'POST' }); S.me = null; S.orders = []; S.seen = null; clearInterval(poll); render(); }
   } catch (e) { toast(e.message); if (el) el.disabled = false; } };
   const upd = o => { const i = S.orders.findIndex(x => x.id === o.id); if (i >= 0) S.orders[i] = o; S.sheet = null; render(); };
