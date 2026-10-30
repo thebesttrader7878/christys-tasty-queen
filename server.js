@@ -117,23 +117,6 @@ async function notify(o) {
   try { await transport.sendMail(buildEmail(o)); return { ok: true, emailed: true, via: 'smtp' }; } catch (err) { console.error('SMTP fallback failed:', err.message); return { ok: true, emailed: false }; }
 }
 
-// ---------- phone push alerts (ntfy.sh, free, optional) ----------
-const NTFY_TOPIC = /^[A-Za-z0-9_-]{8,64}$/.test(String(env.NTFY_TOPIC || '').trim()) ? env.NTFY_TOPIC.trim() : '';
-function alertText(o) {
-  const c = o.customer || {}, pay = o.payment && o.payment.method === 'card' ? 'PAID by card' : 'Pay at pickup';
-  const head = `${money(o.total)} · ${pay}\n${clean(c.name, 40)} · Pickup ${o.when === 'asap' || !o.when ? 'ASAP' : clean(o.when, 30)}\n`;
-  let items = (o.items || []).map(i => `${i.qty}x ${clean(i.name, 40)}`).join(', '); const room = 280 - head.length;
-  if (items.length > room) items = items.slice(0, Math.max(0, room - 3)) + '...';
-  return head + items;
-}
-async function sendPush(title, body, tags) {
-  if (!NTFY_TOPIC) return { ok: false, skipped: true, error: 'Phone alerts are not set up yet.' };
-  try { const r = await fetch('https://ntfy.sh/' + NTFY_TOPIC, { method: 'POST', headers: { Title: title, Priority: 'high', Tags: tags, Click: SITE_URL + '/owner' }, body, signal: AbortSignal.timeout(15000) });
-    const j = await r.json().catch(() => ({})); if (!r.ok) console.error('[ntfy] failed', r.status, j.error || ''); return { ok: r.ok, id: j.id, error: r.ok ? undefined : (j.error || 'HTTP ' + r.status) };
-  } catch (e) { console.error('[ntfy] failed', e.message); return { ok: false, error: e.message }; }
-}
-function pushOrder(o) { if (!NTFY_TOPIC) return; sendPush(`New order #${clean(o.id)}`, alertText(o), o.payment && o.payment.method === 'card' ? 'hamburger,moneybag' : 'hamburger').then(r => console.log('[ntfy] order', o.id, r.ok ? 'sent' : 'failed')); }
-
 // ---------- public API ----------
 const publicOrder = o => ({ id: o.id, created: o.created, status: o.status, when: o.when, customer: { name: o.customer.name }, items: o.items, subtotal: o.subtotal, tax: o.tax, tip: o.tip, total: o.total, refunded: o.refunded || 0, cancelReason: o.cancelReason || '', payment: { label: o.payment.label, method: o.payment.method }, updated: o.updated });
 
@@ -207,7 +190,6 @@ app.post('/api/orders', async (req, res) => {
       items, ...t, payment, refunds: [], refunded: 0, sid: /^[a-z0-9]{8,40}$/i.test(String(b.sid || '')) ? b.sid : '', log: [{ at: created, status: 'new' }] };
     o.pos = POS.push(s.pos, o);
     await store.saveOrder(o);
-    pushOrder(o);
     const n = await notify(o);
     res.json(Object.assign({ ok: true, id: o.id, token: o.token, order: publicOrder(o) }, { email: n }));
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
@@ -321,8 +303,6 @@ app.get('/api/admin/export/:kind.csv', async (req, res) => {
 });
 
 // ---------- menu, hours, settings ----------
-app.get('/api/admin/push', (req, res) => res.json({ ok: true, ready: !!NTFY_TOPIC, topic: NTFY_TOPIC, url: NTFY_TOPIC ? 'https://ntfy.sh/' + NTFY_TOPIC : '' }));
-app.post('/api/admin/push/test', async (req, res) => { const r = await sendPush('Test alert', `Phone alerts for ${NAME} are working. New orders will show up here.`, 'white_check_mark'); res.status(r.ok ? 200 : r.skipped ? 400 : 502).json(r); });
 app.get('/api/admin/settings', async (req, res) => res.json({ ok: true, settings: await getSettings(), menuEdits: await getEdits(), webhook: WEBHOOK_URL, pos: POS.labels }));
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 app.put('/api/admin/settings', async (req, res) => {
@@ -376,7 +356,7 @@ app.use('/owner', (req, res, next) => { res.set('X-Robots-Tag', 'noindex, nofoll
 app.get(['/owner', '/owner/'], (req, res) => res.sendFile(path.join(ownerDir, 'index.html')));
 app.use('/owner', express.static(ownerDir));
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
-app.get('/healthz', (req, res) => res.json({ ok: true, notify: 'formspree', webhook: WEBHOOK_URL, smtpFallback: smtpReady, store: store.kind, ownerLogin: !!(OWNER_EMAIL && OWNER_HASH), push: !!NTFY_TOPIC, stripe: STRIPE_LIVE ? 'live' : 'demo' }));
+app.get('/healthz', (req, res) => res.json({ ok: true, notify: 'formspree', webhook: WEBHOOK_URL, smtpFallback: smtpReady, store: store.kind, ownerLogin: !!(OWNER_EMAIL && OWNER_HASH), stripe: STRIPE_LIVE ? 'live' : 'demo' }));
 app.use('/api', (req, res) => res.status(404).json({ ok: false, error: 'Not found' }));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
