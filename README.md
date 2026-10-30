@@ -1,4 +1,4 @@
-# Christy's Tasty Queen, online ordering demo
+# Kimmie’s-Christy's Tasty Queen, online ordering demo
 
 Small Express app: serves `public/` and `POST /api/orders` (emails each order).
 

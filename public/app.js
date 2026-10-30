@@ -1,4 +1,4 @@
-// Christy's Tasty Queen ordering demo. Data lives in localStorage (like the KeyNest demo).
+// Kimmie’s-Christy's Tasty Queen ordering demo. Data lives in localStorage (like the KeyNest demo).
 (function () {
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -7,7 +7,7 @@
   const LS = { get: (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, set: (k, v) => localStorage.setItem(k, JSON.stringify(v)) };
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const DEF_SETTINGS = {
-    name: "Christy's Tasty Queen", phone: '(913) 300-0130', address: '1405 S 55th St, Kansas City, KS 66106',
+    name: "Kimmie’s-Christy's Tasty Queen", phone: '(913) 300-0130', address: '1405 S 55th St, Kansas City, KS 66106',
     doordashUrl: 'https://www.doordash.com/store/christys-tasty-queen-kansas-city-35171507/',
     taxRate: 9.125, // example rate, confirm with owner / accountant
     pickupMins: 15,
@@ -15,7 +15,7 @@
     hours: DAYS.map(() => ({ open: '10:00', close: '18:00', closed: false })) // DoorDash showed 10am to 6pm on a Wednesday; confirm
   };
   const S = { menu: null, cart: LS.get('ctq_cart', []), mode: 'pickup', q: '', tip: 0 };
-  const settings = () => Object.assign({}, DEF_SETTINGS, LS.get('ctq_settings', {}));
+  const settings = () => Object.assign({}, DEF_SETTINGS, LS.get('ctq_settings', {}), { name: DEF_SETTINGS.name });
   const saveSettings = s => LS.set('ctq_settings', s);
   const orders = () => LS.get('ctq_orders', []);
   const saveOrders = o => LS.set('ctq_orders', o);
@@ -41,7 +41,7 @@
   const count = () => S.cart.reduce((a, l) => a + l.qty, 0);
 
   // ---------- views ----------
-  const header = () => `<header class="top"><div class="wrap"><a class="brand" href="#/" aria-label="Christy's Tasty Queen home"><img class="logo" src="/img/logo-180.jpg" alt="Christy's Tasty Queen logo" data-testid="logo"><span class="bname">Christy's<b>Tasty Queen</b></span></a><span class="grow"></span>
+  const header = () => `<header class="top"><div class="wrap"><a class="brand" href="#/" aria-label="Kimmie’s-Christy's Tasty Queen home"><img class="logo" src="/img/logo-180.jpg" alt="Kimmie’s-Christy's Tasty Queen logo" data-testid="logo"><span class="bname" data-testid="bizname">Kimmie’s-Christy's<b>Tasty Queen</b></span></a><span class="grow"></span>
     <a class="toplink hide-s" href="#c-sandwiches">Menu</a><a class="toplink hide-s" href="#visit">Visit</a>
     <button class="cartbtn" data-act="cart" data-testid="cartbtn" aria-label="Cart">🛒 <span class="hide-s">Cart</span><b data-testid="cartcount" class="${count() ? 'bump' : ''}">${count()}</b></button></div></header>`;
 
@@ -77,9 +77,10 @@
     return `<a class="ctile ${ph ? '' : 'noimg'}" href="#c-${c.id}" ${ph ? `style="background-image:url('/${ph.image}')"` : ''}>${ph ? '' : `<i>${CATICON[c.id] || '🍔'}</i>`}<span>${esc(c.name)}<small>${c.items.length} item${c.items.length === 1 ? "" : "s"}</small></span></a>`; }).join('')}</div></section>`;
   const store = () => { const s = settings(), open = openNow(s);
     const cats = S.menu.categories.filter(c => c.items.some(id => item(id) && !item(id).hidden));
-    const q = S.q.toLowerCase(), tel = s.phone.replace(/\D/g, ''), map = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent("Christy's Tasty Queen " + s.address);
+    const q = S.q.toLowerCase(), tel = s.phone.replace(/\D/g, ''), map = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent("Kimmie’s-Christy's Tasty Queen " + s.address);
     return header() + `<section class="hero"><div class="wrap">${mosaic()}<div class="hcopy">
-      <img class="hlogo" src="/img/logo.jpg" alt="Christy's Tasty Queen" data-testid="hero-logo">
+      <img class="hlogo" src="/img/logo.jpg" alt="Kimmie’s-Christy's Tasty Queen" data-testid="hero-logo">
+      <p class="hname" data-testid="hero-name">Kimmie’s-Christy's Tasty Queen</p>
       <div class="chips"><span class="chip ${open && s.acceptOrders ? 'open' : 'closed'}" data-testid="openchip"><i class="dot"></i>${open && s.acceptOrders ? 'Open now' : 'Closed, order ahead'}</span><span class="chip">🕙 ${todayHours(s)}</span><span class="chip">📍 Turner, KCK</span></div>
       <h1>Crispy tenderloins.<br>Real burgers.<br><em>Cold soft serve.</em></h1>
       <p>Turner's neighborhood drive-in at ${esc(s.address.split(',')[0])}. Order ahead and it's hot when you pull up.</p>
@@ -98,7 +99,7 @@
         <section class="visit reveal" id="visit" data-testid="visit"><div><span class="kicker">Come see us</span><h2>Hours & location</h2>
           <p class="addr">${esc(s.address)}</p><div class="vbtns"><a class="btn dark" href="${map}" target="_blank" rel="noopener" data-testid="maplink">📍 Get directions</a><a class="btn ghost" href="tel:${tel}">📞 ${esc(s.phone)}</a></div></div>
           <ul class="hours">${s.hours.map((h, i) => `<li class="${i === new Date().getDay() ? 'today' : ''}"><span>${DAYS[i]}</span><b>${h.closed ? 'Closed' : fmtT(h.open) + ' to ' + fmtT(h.close)}</b></li>`).join('')}</ul></section>
-        <footer class="foot"><b>Christy's Tasty Queen</b><span>${esc(s.address)} · <a href="tel:${tel}">${esc(s.phone)}</a></span>
+        <footer class="foot"><b>Kimmie’s-Christy's Tasty Queen</b><span>${esc(s.address)} · <a href="tel:${tel}">${esc(s.phone)}</a></span>
           <span class="fine">Demo ordering site. Payments are simulated test mode, no real money. <a href="#/admin" data-testid="ownerlink">Owner login</a></span></footer>
       </main><aside class="side"><div class="card"><h3>Your order</h3>${cartLines()}${S.cart.length ? sumHtml(totals()) + '<a class="btn block" href="#/checkout" data-testid="side-checkout">Checkout</a>' : ''}</div></aside></div>
       ${count() ? `<a class="btn fab" href="#/checkout" data-testid="fab"><span class="fq">${count()}</span><span>View cart</span><span>${m(totals().subtotal)}</span></a>` : ''}`; };
@@ -161,6 +162,7 @@
   const confirmation = id => { const o = orders().find(x => x.id === id), s = settings(); if (!o) return header() + '<div class="wrap page"><div class="card">Order not found. <a href="#/">Menu</a></div></div>';
     const st = ['new', 'preparing', 'ready', 'completed'], k = st.indexOf(o.status);
     return header() + `<div class="wrap page" style="max-width:600px"><div class="card done" data-testid="confirmation"><div class="big">🎉</div><h2 style="margin:0">Thanks, ${esc(o.customer.name.split(' ')[0])}! Order #${esc(o.id)} is in.</h2>
+      <p class="mut" style="margin:0" data-testid="conf-name">${esc(s.name)}</p>
       <p class="mut" style="margin:0">Pickup at ${esc(s.address)} in about ${s.pickupMins} min. ${o.when !== 'asap' ? '(' + esc(o.when) + ')' : ''}</p>
       <div class="steps">${st.slice(0, 3).map((x, i) => `<div class="${i <= k ? 'on' : ''}"></div>`).join('')}</div><b data-testid="orderstatus">${{ new: 'Order received', preparing: 'Being made', ready: 'Ready for pickup', completed: 'Completed' }[o.status]}</b>
       <span class="test" data-testid="placed">Order placed · ${esc(o.payment.label)}</span></div>
@@ -191,7 +193,7 @@
         <div class="ord"><b>POS connection <span class="test">Stubbed</span></b><select data-ch="pos" data-testid="pos-select">${Object.values(POS.adapters).map(p => `<option value="${p.id}" ${s.pos === p.id ? 'selected' : ''}>${esc(p.label)}</option>`).join('')}</select>
         <span class="fine">Square, Clover and Toast adapters are built but stubbed until we know which POS Christy's uses. Orders get mapped to that POS's order format and logged here.</span>
         ${pl.map(x => `<span class="fine">${new Date(x.at).toLocaleTimeString()} · ${esc(x.provider)} · ${esc(x.action)}</span>`).join('')}</div>`; }
-    return header() + `<div class="wrap page"><div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-family:Fredoka;display:flex;align-items:center;gap:12px"><img class="alogo" src="/img/logo-180.jpg" alt="" data-testid="admin-logo">Owner dashboard</h1><button class="btn ghost sm" data-act="logout">Log out</button></div>
+    return header() + `<div class="wrap page"><div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-family:Fredoka;display:flex;align-items:center;gap:12px"><img class="alogo" src="/img/logo-180.jpg" alt="" data-testid="admin-logo"><span>Owner dashboard<small style="display:block;font:600 13px Inter,sans-serif;opacity:.7" data-testid="admin-name">Kimmie’s-Christy's Tasty Queen</small></span></h1><button class="btn ghost sm" data-act="logout">Log out</button></div>
       <nav class="tabs">${tabs.map(([k, l]) => `<a href="#/admin" class="${tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" data-testid="tab-${k}">${l}</a>`).join('')}</nav><div class="card">${body}</div></div>`; };
 
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -40px 0px' }) : null;

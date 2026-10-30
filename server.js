@@ -1,4 +1,4 @@
-// Christy's Tasty Queen demo: serves the static site and emails orders.
+// Kimmie’s-Christy's Tasty Queen demo: serves the static site and emails orders.
 const express = require('express');
 const path = require('path');
 const nodemailer = require('nodemailer');
@@ -23,6 +23,7 @@ function buildEmail(o) {
   const lines = (o.items || []).map(i => `${i.qty} x ${clean(i.name)}${i.mods && i.mods.length ? ' (' + i.mods.map(clean).join(', ') + ')' : ''}${i.note ? ' Note: ' + clean(i.note) : ''}  ${money(i.lineTotal)}`);
   const c = o.customer || {};
   const text = [
+    "Kimmie’s-Christy's Tasty Queen",
     `NEW ORDER #${clean(o.id)} (TEST)`,
     `${o.mode === 'delivery' ? 'DELIVERY' : 'PICKUP'} ${o.when === 'asap' || !o.when ? 'ASAP' : 'at ' + clean(o.when)}`,
     '', `Customer: ${clean(c.name)}`, `Phone: ${clean(c.phone)}`, `Email: ${clean(c.email)}`,
@@ -34,7 +35,7 @@ function buildEmail(o) {
     `Payment: ${clean(o.payment && o.payment.label)} (simulated, no real money)`,
     o.notes ? `Order notes: ${clean(o.notes)}` : ''
   ].filter(x => x !== '').join('\n');
-  return { to: TO, from: SMTP_USER || 'orders@christys-demo.local', subject: `New ${o.mode || 'pickup'} order #${clean(o.id)} - ${money(o.total)} (test)`, text };
+  return { to: TO, from: SMTP_USER || 'orders@christys-demo.local', subject: `Kimmie’s-Christy's Tasty Queen: new ${o.mode || 'pickup'} order #${clean(o.id)} - ${money(o.total)} (test)`, text };
 }
 
 app.post('/api/orders', async (req, res) => {
@@ -57,5 +58,5 @@ app.post('/api/orders', async (req, res) => {
 app.get('/healthz', (req, res) => res.json({ ok: true, smtp: smtpReady }));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-if (require.main === module) app.listen(PORT, () => console.log(`Christy's demo on :${PORT} (smtp ${smtpReady ? 'on' : 'off, logging emails'})`));
+if (require.main === module) app.listen(PORT, () => console.log(`Kimmie’s-Christy's Tasty Queen demo on :${PORT} (smtp ${smtpReady ? 'on' : 'off, logging emails'})`));
 module.exports = { app, buildEmail };

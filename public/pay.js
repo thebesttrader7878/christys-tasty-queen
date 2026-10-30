@@ -10,7 +10,7 @@
     TEST_CARD: '4242 4242 4242 4242',
     account: get,
     // Onboarding steps mirror Stripe Connect: business info -> bank -> verified
-    startConnect: biz => { const a = { status: 'pending', business: biz || "Christy's Tasty Queen", id: 'acct_test_' + Math.random().toString(36).slice(2, 10), started: new Date().toISOString() }; set(a); return a; },
+    startConnect: biz => { const a = { status: 'pending', business: biz || "Kimmie’s-Christy's Tasty Queen", id: 'acct_test_' + Math.random().toString(36).slice(2, 10), started: new Date().toISOString() }; set(a); return a; },
     finishConnect: () => { const a = get(); a.status = 'connected'; a.bank = 'Test Bank •••• 6789'; a.connected = new Date().toISOString(); set(a); return a; },
     disconnect: () => set({ status: 'none' }),
     cardFee: amt => r2(amt * 0.029 + 0.30), // Stripe standard card pricing, paid by the restaurant

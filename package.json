@@ -2,7 +2,7 @@
   "name": "christys-tasty-queen",
   "version": "1.0.0",
   "private": true,
-  "description": "Demo online ordering site for Christy's Tasty Queen",
+  "description": "Demo online ordering site for Kimmie’s-Christy's Tasty Queen",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
   "engines": { "node": ">=18" },
