@@ -26,6 +26,7 @@ const transport = smtpReady ? nodemailer.createTransport({ host: SMTP_HOST, port
 
 // ---------- Stripe Connect (Standard, OAuth) ----------
 const STRIPE_LIVE = !!(env.STRIPE_CLIENT_ID && env.STRIPE_SECRET_KEY);
+const PLATFORM_FEE_CENTS = Math.max(0, parseInt(env.PLATFORM_FEE_CENTS || '0', 10) || 0); // platform fee per card order, taken as application_fee_amount on direct charges
 const stripeApi = async (method, p, params, account) => {
   const r = await fetch('https://api.stripe.com' + p, { method, headers: Object.assign({ Authorization: 'Bearer ' + env.STRIPE_SECRET_KEY, 'Content-Type': 'application/x-www-form-urlencoded' }, account ? { 'Stripe-Account': account } : {}), body: params ? new URLSearchParams(params).toString() : undefined, signal: AbortSignal.timeout(15000) });
   const j = await r.json(); if (!r.ok) throw new Error((j.error && j.error.message) || 'Stripe error ' + r.status); return j;
@@ -45,7 +46,7 @@ const DAYS = 7;
 const DEF_SETTINGS = { taxRate: 9.125, pickupMins: 15, acceptOrders: true, pos: 'none', doordashUrl: 'https://www.doordash.com/store/christys-tasty-queen-kansas-city-35171507/', hours: Array.from({ length: DAYS }, () => ({ open: '10:00', close: '18:00', closed: false })) };
 const getSettings = async () => Object.assign({}, DEF_SETTINGS, await store.getKV('settings', {}));
 const getEdits = async () => store.getKV('menuEdits', {});
-const getStripe = async () => store.getKV('stripe', { status: 'none' });
+const getStripe = async () => { const st = await store.getKV('stripe', { status: 'none' }); if (st.status !== 'connected' && STRIPE_LIVE && /^acct_[A-Za-z0-9]+$/.test(env.STRIPE_ACCOUNT_ID || '')) return { status: 'connected', id: env.STRIPE_ACCOUNT_ID, demo: false, fromEnv: true }; return st; };
 
 const app = express();
 app.set('trust proxy', 1);
@@ -128,10 +129,25 @@ app.get('/api/site', async (req, res) => { const s = await getSettings(), st = a
 app.post('/api/checkout/intent', async (req, res) => {
   try { const st = await getStripe(); if (!STRIPE_LIVE || st.status !== 'connected') return res.status(400).json({ ok: false, error: 'Card payments are in demo mode.' });
     const s = await getSettings(), items = priceCart(req.body.items, await getEdits()), t = totalsFor(items, s.taxRate, req.body.tip);
-    const pi = await stripeApi('POST', '/v1/payment_intents', { amount: Math.round(t.total * 100), currency: 'usd', 'automatic_payment_methods[enabled]': 'true', description: NAME + ' online pickup order' }, st.id);
+    const amount = Math.round(t.total * 100), fee = PLATFORM_FEE_CENTS && PLATFORM_FEE_CENTS < amount ? PLATFORM_FEE_CENTS : 0;
+    const pi = await stripeApi('POST', '/v1/payment_intents', Object.assign({ amount, currency: 'usd', 'automatic_payment_methods[enabled]': 'true', description: NAME + ' online pickup order' }, fee ? { application_fee_amount: String(fee) } : {}), st.id);
     res.json({ ok: true, clientSecret: pi.client_secret, id: pi.id, total: t.total });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
+
+// Live mode without a publishable key: Stripe-hosted Checkout as a direct charge on the connected account, platform fee via application_fee_amount.
+app.post('/api/checkout/session', async (req, res) => {
+  try { const st = await getStripe(); if (!STRIPE_LIVE || st.status !== 'connected') return res.status(400).json({ ok: false, error: 'Card payments are not set up yet. Choose pay at pickup.' });
+    const s = await getSettings(); if (!s.acceptOrders) return res.status(409).json({ ok: false, error: 'We are not taking online orders right now.' });
+    const items = priceCart(req.body.items, await getEdits()); if (!items.length) return res.status(400).json({ ok: false, error: 'Your cart is empty.' });
+    const t = totalsFor(items, s.taxRate, req.body.tip), amount = Math.round(t.total * 100), fee = PLATFORM_FEE_CENTS && PLATFORM_FEE_CENTS < amount ? PLATFORM_FEE_CENTS : 0;
+    const cs = await stripeApi('POST', '/v1/checkout/sessions', Object.assign({ mode: 'payment', 'line_items[0][quantity]': '1', 'line_items[0][price_data][currency]': 'usd', 'line_items[0][price_data][unit_amount]': String(amount),
+      'line_items[0][price_data][product_data][name]': NAME + ' pickup order', 'line_items[0][price_data][product_data][description]': items.map(l => `${l.qty}x ${l.name}`).join(', ').slice(0, 300) + ` (incl. tax${t.tip ? ' & tip' : ''})`,
+      success_url: SITE_URL + '/#/paid?cs={CHECKOUT_SESSION_ID}', cancel_url: SITE_URL + '/#/checkout', 'payment_intent_data[description]': NAME + ' online pickup order' }, fee ? { 'payment_intent_data[application_fee_amount]': String(fee) } : {}), st.id);
+    res.json({ ok: true, url: cs.url, id: cs.id, total: t.total });
+  } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
+});
+const usedPI = new Set();
 
 const TRACK_TYPES = new Set(['pageview', 'menuview', 'addtocart', 'checkout']);
 const trackHits = new Map();
@@ -156,9 +172,13 @@ app.post('/api/orders', async (req, res) => {
     let payment;
     if (p.method === 'store') payment = { method: 'store', label: 'Pay at pickup', id: 'pay_instore_' + now, fee: 0, demo: !STRIPE_LIVE };
     else if (STRIPE_LIVE && st.status === 'connected') {
-      const pi = await stripeApi('GET', '/v1/payment_intents/' + encodeURIComponent(String(p.id || '')), null, st.id);
+      let piId = String(p.id || '');
+      if (p.session) { const cs = await stripeApi('GET', '/v1/checkout/sessions/' + encodeURIComponent(String(p.session)), null, st.id); if (cs.payment_status !== 'paid') return res.status(402).json({ ok: false, error: 'Payment did not go through.' }); piId = String(cs.payment_intent || ''); }
+      if (!/^pi_[A-Za-z0-9]+$/.test(piId)) return res.status(400).json({ ok: false, error: 'Payment missing.' });
+      if (usedPI.has(piId) || (await store.listOrders({ from: new Date(now - 3 * 864e5).toISOString() })).some(x => x.payment && x.payment.id === piId)) return res.status(409).json({ ok: false, error: 'This payment was already used for an order.' });
+      const pi = await stripeApi('GET', '/v1/payment_intents/' + encodeURIComponent(piId), null, st.id);
       if (pi.status !== 'succeeded' || pi.amount !== Math.round(t.total * 100)) return res.status(402).json({ ok: false, error: 'Payment did not go through.' });
-      payment = { method: 'card', label: 'Card (Stripe)', id: pi.id, fee: PAY.cardFee(t.total), live: true, account: st.id };
+      usedPI.add(pi.id); payment = { method: 'card', label: 'Card (Stripe' + (/^sk_test_/.test(env.STRIPE_SECRET_KEY) ? ' test' : '') + ')', id: pi.id, fee: PAY.cardFee(t.total), live: true, account: st.id, platformFee: (pi.application_fee_amount || 0) / 100 };
     } else {
       if (!/^pi_demo_[a-z0-9]{6,20}$/.test(String(p.id || ''))) return res.status(400).json({ ok: false, error: 'Payment missing.' });
       payment = { method: 'card', label: 'Card •••• ' + clean(p.last4, 4).replace(/\D/g, '') + ' (demo)', id: p.id, fee: PAY.cardFee(t.total), demo: true };

@@ -144,8 +144,8 @@
         <label class="f">Order notes<textarea name="notes" rows="2" placeholder="Anything we should know?"></textarea></label></div>
       <div class="card"><h3>Your order</h3>${cartLines()}</div>
       <div class="card"><h3>Tip the crew</h3><div class="tips">${[0, 10, 15, 20].map(p => { const v = r2(t.subtotal * p / 100); return `<button type="button" class="${S.tip === v ? 'on' : ''}" data-act="tip" data-v="${v}">${p ? p + '%' : 'None'}</button>`; }).join('')}</div></div>
-      <div class="card"><h3>Payment ${liveCard() ? '' : '<span class="test" data-testid="demo-pay">Demo mode, no real payments</span>'}</h3><div class="seg"><label><input type="radio" name="pay" value="card" checked data-ch="pay"> 💳 Card</label><label><input type="radio" name="pay" value="store" data-ch="pay" data-testid="co-paystore"> 💵 Pay at pickup</label></div>
-        <div id="cardbox">${liveCard() ? '<div id="stripe-el" data-testid="stripe-element"></div>' : `<label class="f">Card number<input type="text" name="card" inputmode="numeric" value="4242 4242 4242 4242" data-testid="co-card"></label><div class="two"><label class="f">Exp<input type="text" name="exp" value="12/30"></label><label class="f">CVC<input type="text" name="cvc" value="123"></label></div><p class="fine">Demo mode. Use 4242 4242 4242 4242. Nothing is charged.</p>`}</div>
+      <div class="card"><h3>Payment ${liveCard() || hostedCard() || cardOff() ? '' : '<span class="test" data-testid="demo-pay">Demo mode, no real payments</span>'}</h3><div class="seg">${cardOff() ? '' : '<label><input type="radio" name="pay" value="card" checked data-ch="pay"> 💳 Card</label>'}<label><input type="radio" name="pay" value="store" ${cardOff() ? 'checked' : ''} data-ch="pay" data-testid="co-paystore"> 💵 Pay at pickup</label></div>
+        <div id="cardbox">${cardOff() ? '' : liveCard() ? '<div id="stripe-el" data-testid="stripe-element"></div>' : hostedCard() ? '<p class="fine" data-testid="hosted-card">🔒 You\'ll enter your card on Stripe\'s secure checkout page, then come right back here.</p>' : `<label class="f">Card number<input type="text" name="card" inputmode="numeric" value="4242 4242 4242 4242" data-testid="co-card"></label><div class="two"><label class="f">Exp<input type="text" name="exp" value="12/30"></label><label class="f">CVC<input type="text" name="cvc" value="123"></label></div><p class="fine">Demo mode. Use 4242 4242 4242 4242. Nothing is charged.</p>`}</div>
         <div id="payerr" class="req" hidden></div>
         ${sumHtml(t)}
         <button class="btn block" data-testid="placeorder" ${belowMin || !s.acceptOrders ? 'disabled' : ''}>${s.acceptOrders ? 'Place order · ' + m(t.total) : 'Not taking online orders right now'}</button></div>
@@ -154,6 +154,8 @@
 
   // Live Stripe (owner connected her account and keys are set): Payment Element in deferred-intent mode.
   const liveCard = () => S.cfg.stripe.mode === 'live' && S.cfg.stripe.connected && S.cfg.stripe.publishableKey;
+  const hostedCard = () => S.cfg.stripe.mode === 'live' && S.cfg.stripe.connected && !S.cfg.stripe.publishableKey;
+  const cardOff = () => S.cfg.stripe.mode === 'live' && !S.cfg.stripe.connected;
   let SE = null;
   const mountStripe = () => { if (!liveCard() || !$('#stripe-el')) return; const go = () => { const st = Stripe(S.cfg.stripe.publishableKey, { stripeAccount: S.cfg.stripe.account });
       const els = st.elements({ mode: 'payment', amount: Math.round(totals().total * 100), currency: 'usd' }); els.create('payment').mount('#stripe-el'); SE = { st, els }; };
@@ -172,16 +174,29 @@
       const cr = await SE.st.confirmPayment({ elements: SE.els, clientSecret: ir.clientSecret, redirect: 'if_required' });
       if (cr.error) return fail(cr.error.message);
       payment = { method: 'card', id: cr.paymentIntent.id };
+    } else if (hostedCard()) {
+      LS.set('ctq_customer', { name: d.name, phone: d.phone, email: d.email });
+      LS.set('ctq_pending', { sid: SID, when: d.when, customer: { name: d.name, phone: d.phone, email: d.email }, notes: d.notes || '', tip: S.tip, items: S.cart.map(l => ({ id: l.id, qty: l.qty, mods: l.mods, note: l.note })) });
+      let cr; try { cr = await (await fetch('/api/checkout/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: S.cart, tip: S.tip }) })).json(); } catch (e) { return fail('Could not reach us. Check your connection and try again.'); }
+      if (!cr.ok) return fail(cr.error || 'Card payment is not available right now.');
+      location.href = cr.url; return;
+    } else if (cardOff()) { return fail('Card payments are not set up yet. Choose pay at pickup.');
     } else { const pay = PAY.charge({ amount: t.total, method: 'card', card: d.card }); if (!pay.ok) return fail(pay.error); payment = { method: 'card', id: pay.id, last4: pay.last4 }; }
     LS.set('ctq_customer', { name: d.name, phone: d.phone, email: d.email });
     const body = { sid: SID, when: d.when, customer: { name: d.name, phone: d.phone, email: d.email }, notes: d.notes || '', tip: S.tip, payment, items: S.cart.map(l => ({ id: l.id, qty: l.qty, mods: l.mods, note: l.note })) };
+    return submitOrder(body, fail); };
+  const submitOrder = async (body, fail) => {
     let r;
     try { r = await (await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json(); } catch (e) { return fail('Could not reach us. Check your connection and try again.'); }
     if (!r.ok) return fail(r.error || 'Something went wrong.');
     const mine = myOrders(); mine[r.id] = r.token; LS.set('ctq_my_orders', mine);
     S.conf[r.id] = r.order;
     if (r.email && r.email.browserSend) { try { const b = r.email.browserSend; if (/^https:\/\/formspree\.io\/f\//.test(b.url)) fetch(b.url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(b.fields) }); } catch (e) {} }
-    S.cart = []; S.tip = 0; saveCart(); location.hash = '#/order/' + r.id; };
+    S.cart = []; S.tip = 0; saveCart(); localStorage.removeItem('ctq_pending'); location.hash = '#/order/' + r.id; };
+  // Back from Stripe Checkout: turn the paid session into the order.
+  const finishPaid = async () => { const cs = (location.hash.match(/cs=([A-Za-z0-9_]+)/) || [])[1], pend = LS.get('ctq_pending', null);
+    if (!cs || !pend) { location.hash = '#/checkout'; return; }
+    await submitOrder(Object.assign({}, pend, { payment: { method: 'card', session: cs } }), m => { $('#app').innerHTML = header() + `<div class="wrap page"><div class="card"><h3>Payment received, order not saved</h3><p>${esc(m)}</p><p>Please call us so we can sort it out.</p><a class="btn ghost" href="#/">Back to menu</a></div></div>`; }); };
 
   // Customer confirmation: polls the server so the owner's updates show up live.
   let pollT = null;
@@ -208,6 +223,7 @@
   const reveal = () => document.querySelectorAll('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('in'));
   // ---------- router ----------
   const render = () => { const h = location.hash || '#/'; let html;
+    if (h.startsWith('#/paid')) { $('#app').innerHTML = header() + '<div class="wrap page"><div class="card" data-testid="paying">Finishing your order...</div></div>'; finishPaid(); return; }
     if (h.startsWith('#/checkout')) html = checkout(); else if (h.startsWith('#/order/')) html = confirmation(h.slice(8)); else html = store();
     if (h.startsWith('#/checkout') && S.cart.length) track('checkout', true);
     const old = $('#co'), keep = old ? [...old.elements].filter(x => x.name && x.type !== 'radio').map(x => [x.name, x.value]) : null;
