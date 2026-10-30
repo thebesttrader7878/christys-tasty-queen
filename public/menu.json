@@ -416,7 +416,7 @@
    "name": "Grilled Cheese",
    "description": "Cheesy delight on toasted bread, perfect for those craving a classic comfort food.",
    "price": 6.69,
-   "image": null,
+   "image": "img/grilled-cheese.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -435,7 +435,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "grilled-chicken": {
    "id": "grilled-chicken",
@@ -443,7 +444,7 @@
    "name": "Grilled Chicken",
    "description": "Mayonnaise and lettuce",
    "price": 8.69,
-   "image": null,
+   "image": "img/grilled-chicken.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -462,7 +463,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "chicken-club": {
    "id": "chicken-club",
@@ -470,7 +472,7 @@
    "name": "Chicken Club",
    "description": "Breaded or Grilled chicken w/bacon, cheese, tomato, lettuce and mayonnaise",
    "price": 9.09,
-   "image": null,
+   "image": "img/chicken-club.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -489,7 +491,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "grilled-ham-cheese": {
    "id": "grilled-ham-cheese",
@@ -497,7 +500,7 @@
    "name": "Grilled Ham & Cheese",
    "description": "Mayonnaise and lettuce",
    "price": 8.19,
-   "image": null,
+   "image": "img/grilled-ham-cheese.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -516,7 +519,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "bbq-ham": {
    "id": "bbq-ham",
@@ -524,7 +528,7 @@
    "name": "Bbq Ham",
    "description": "",
    "price": 8.19,
-   "image": null,
+   "image": "img/bbq-ham.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -543,7 +547,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "taco-burger": {
    "id": "taco-burger",
@@ -551,7 +556,7 @@
    "name": "Taco Burger",
    "description": "Ground beef, lettuce, cheese and taco sauce",
    "price": 8.19,
-   "image": null,
+   "image": "img/taco-burger.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -570,7 +575,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "blt": {
    "id": "blt",
@@ -578,7 +584,7 @@
    "name": "BLT",
    "description": "Crispy bacon, fresh lettuce, and tomato on toasted bread.",
    "price": 8.19,
-   "image": null,
+   "image": "img/blt.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -597,7 +603,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "double-hamburger": {
    "id": "double-hamburger",
@@ -605,7 +612,7 @@
    "name": "Double Hamburger",
    "description": "Mustard, ketchup, lettuce, onion and pickle",
    "price": 9.09,
-   "image": null,
+   "image": "img/double-hamburger.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -624,7 +631,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "triple-hamburger": {
    "id": "triple-hamburger",
@@ -632,7 +640,7 @@
    "name": "Triple Hamburger",
    "description": "Mustard, ketchup, lettuce, onion and pickle",
    "price": 10.99,
-   "image": null,
+   "image": "img/triple-hamburger.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -651,7 +659,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "grilled-ham": {
    "id": "grilled-ham",
@@ -659,7 +668,7 @@
    "name": "Grilled Ham",
    "description": "Mayonnaise and lettuce",
    "price": 6.39,
-   "image": null,
+   "image": "img/grilled-ham.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -678,7 +687,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "grilled-tenderloin": {
    "id": "grilled-tenderloin",
@@ -740,7 +750,7 @@
    "name": "Hamburger",
    "description": "Mustard, ketchup, lettuce, onion and pickle",
    "price": 7.19,
-   "image": null,
+   "image": "img/hamburger.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -759,7 +769,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "breaded-shrimp": {
    "id": "breaded-shrimp",
@@ -794,7 +805,7 @@
    "name": "Corn Dog",
    "description": "Add a basket includes french fries and 3 onion rings",
    "price": 6.69,
-   "image": null,
+   "image": "img/corn-dog.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -813,7 +824,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "dinner-salad": {
    "id": "dinner-salad",
@@ -821,7 +833,7 @@
    "name": "Dinner Salad",
    "description": "Iceberg lettuce, ham, turkey, bacon, tomato and cheese. Add a basket includes french fries and 3 onion rings",
    "price": 9.49,
-   "image": null,
+   "image": "img/dinner-salad.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -840,7 +852,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "grilled-chicken-salad": {
    "id": "grilled-chicken-salad",
@@ -848,7 +861,7 @@
    "name": "Grilled Chicken Salad",
    "description": "Iceburg lettuce, tomato and cheese. Add a basket includes french fries and 3 onion rings",
    "price": 10.29,
-   "image": null,
+   "image": "img/grilled-chicken-salad.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -867,7 +880,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "breaded-chicken-salad": {
    "id": "breaded-chicken-salad",
@@ -929,7 +943,7 @@
    "name": "Breaded Chicken Nuggets",
    "description": "6 Pieces. Add a basket includes french fries and 3 onion rings",
    "price": 6.69,
-   "image": null,
+   "image": "img/breaded-chicken-nuggets.jpg",
    "modifiers": [
     {
      "id": "basket",
@@ -948,7 +962,8 @@
      ],
      "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "breaded-mushrooms": {
    "id": "breaded-mushrooms",
@@ -1010,8 +1025,9 @@
    "name": "Breaded Cauliflower",
    "description": "Crispy, golden-breaded cauliflower florets.",
    "price": 6.29,
-   "image": null,
-   "modifiers": []
+   "image": "img/breaded-cauliflower.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "basket-french-fries-3-onion-rings": {
    "id": "basket-french-fries-3-onion-rings",
@@ -1019,8 +1035,9 @@
    "name": "Basket (French Fries & 3 onion rings)",
    "description": "A basket is the perfect addition to any sandwich! Enjoy a full order of french fries and 3 onion rings or swap out the fries for your favorite side!",
    "price": 7.69,
-   "image": null,
-   "modifiers": []
+   "image": "img/basket-french-fries-3-onion-rings.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "tater-tots": {
    "id": "tater-tots",
@@ -1028,8 +1045,9 @@
    "name": "Tater  Tots",
    "description": "18",
    "price": 5.79,
-   "image": null,
-   "modifiers": []
+   "image": "img/tater-tots.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "onion-rings": {
    "id": "onion-rings",
@@ -1055,8 +1073,9 @@
    "name": "Extra Bun (plain)",
    "description": "",
    "price": 1.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/extra-bun-plain.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "extra-bun-w-fixins": {
    "id": "extra-bun-w-fixins",
@@ -1064,8 +1083,9 @@
    "name": "Extra Bun (w/fixins)",
    "description": "",
    "price": 2.49,
-   "image": null,
-   "modifiers": []
+   "image": "img/extra-bun-w-fixins.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "bbq-sauce": {
    "id": "bbq-sauce",
@@ -1073,8 +1093,9 @@
    "name": "Bbq Sauce",
    "description": "",
    "price": 0.79,
-   "image": null,
-   "modifiers": []
+   "image": "img/bbq-sauce.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "sliced-cheese": {
    "id": "sliced-cheese",
@@ -1082,8 +1103,9 @@
    "name": "Sliced Cheese",
    "description": "",
    "price": 0.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/sliced-cheese.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "marinara": {
    "id": "marinara",
@@ -1091,8 +1113,9 @@
    "name": "Marinara",
    "description": "",
    "price": 0.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/marinara.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "spicy-dipping-sauce": {
    "id": "spicy-dipping-sauce",
@@ -1100,8 +1123,9 @@
    "name": "Spicy Dipping Sauce",
    "description": "",
    "price": 0.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/spicy-dipping-sauce.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "honey-mustard": {
    "id": "honey-mustard",
@@ -1109,8 +1133,9 @@
    "name": "Honey Mustard",
    "description": "",
    "price": 0.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/honey-mustard.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "tomato": {
    "id": "tomato",
@@ -1118,8 +1143,9 @@
    "name": "Tomato",
    "description": "",
    "price": 0.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/tomato.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "ranch": {
    "id": "ranch",
@@ -1127,8 +1153,9 @@
    "name": "Ranch",
    "description": "",
    "price": 0.99,
-   "image": null,
-   "modifiers": []
+   "image": "img/ranch.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "bacon": {
    "id": "bacon",
@@ -1136,8 +1163,9 @@
    "name": "Bacon",
    "description": "(2)",
    "price": 3.89,
-   "image": null,
-   "modifiers": []
+   "image": "img/bacon.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "horseradish": {
    "id": "horseradish",
@@ -1145,8 +1173,9 @@
    "name": "Horseradish",
    "description": "",
    "price": 0.79,
-   "image": null,
-   "modifiers": []
+   "image": "img/horseradish.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "pickles": {
    "id": "pickles",
@@ -1154,8 +1183,9 @@
    "name": "Pickles",
    "description": "",
    "price": 0.59,
-   "image": null,
-   "modifiers": []
+   "image": "img/pickles.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "vanilla-soft-serve-ice-cream-quart": {
    "id": "vanilla-soft-serve-ice-cream-quart",
@@ -1163,8 +1193,9 @@
    "name": "Vanilla Soft Serve Ice Cream",
    "description": "Quart",
    "price": 5.79,
-   "image": null,
-   "modifiers": []
+   "image": "img/vanilla-soft-serve-ice-cream-quart.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "vanilla-soft-serve-ice-cream-pint": {
    "id": "vanilla-soft-serve-ice-cream-pint",
@@ -1172,8 +1203,9 @@
    "name": "Vanilla Soft Serve Ice Cream",
    "description": "Pint",
    "price": 4.39,
-   "image": null,
-   "modifiers": []
+   "image": "img/vanilla-soft-serve-ice-cream-pint.jpg",
+   "modifiers": [],
+   "imageSource": "generated"
   },
   "flavor-option": {
    "id": "flavor-option",
@@ -1238,7 +1270,7 @@
    "name": "Dr. Pepper",
    "description": "Unique blend of 23 flavors, carbonated soft drink.",
    "price": 0.09,
-   "image": null,
+   "image": "img/dr-pepper.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1262,7 +1294,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "sweet-tea": {
    "id": "sweet-tea",
@@ -1270,7 +1303,7 @@
    "name": "Sweet Tea",
    "description": "Refreshing sweet tea brewed to perfection.",
    "price": 0.09,
-   "image": null,
+   "image": "img/sweet-tea.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1294,7 +1327,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "diet-dr-pepper": {
    "id": "diet-dr-pepper",
@@ -1302,7 +1336,7 @@
    "name": "Diet Dr. Pepper",
    "description": "Crisp, Sugar-Free Dr. Pepper with a Unique Blend of 23 Flavors",
    "price": 0.09,
-   "image": null,
+   "image": "img/diet-dr-pepper.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1326,7 +1360,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "big-red": {
    "id": "big-red",
@@ -1334,7 +1369,7 @@
    "name": "Big Red",
    "description": "Various size options available: Small, Medium, Large.",
    "price": 0.09,
-   "image": null,
+   "image": "img/big-red.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1358,7 +1393,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "root-beer": {
    "id": "root-beer",
@@ -1366,7 +1402,7 @@
    "name": "Root Beer",
    "description": "Smooth, classic root beer with a rich, frothy head. Perfectly sweet and endlessly refreshing.",
    "price": 0.09,
-   "image": null,
+   "image": "img/root-beer.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1390,7 +1426,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "limeade": {
    "id": "limeade",
@@ -1398,7 +1435,7 @@
    "name": "Limeade",
    "description": "Refreshing lime beverage. Available in Small, Medium, or Large sizes.",
    "price": 0.09,
-   "image": null,
+   "image": "img/limeade.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1422,7 +1459,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "mountain-dew": {
    "id": "mountain-dew",
@@ -1430,7 +1468,7 @@
    "name": "Mountain Dew",
    "description": "Exhilarate and quench your thirst with a one of a kind taste.",
    "price": 0.09,
-   "image": null,
+   "image": "img/mountain-dew.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1454,7 +1492,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "starry": {
    "id": "starry",
@@ -1462,7 +1501,7 @@
    "name": "Starry",
    "description": "Refreshing clear soda, formerly known as Sierra Mist.",
    "price": 0.09,
-   "image": null,
+   "image": "img/starry.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1486,7 +1525,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "pink-lemonade": {
    "id": "pink-lemonade",
@@ -1494,7 +1534,7 @@
    "name": "Pink Lemonade",
    "description": "Refreshing, slightly tangy pink lemonade with a sweet, colorful twist.",
    "price": 0.09,
-   "image": null,
+   "image": "img/pink-lemonade.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1518,7 +1558,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "brewed-unsweetened-tea": {
    "id": "brewed-unsweetened-tea",
@@ -1526,7 +1567,7 @@
    "name": "Brewed Unsweetened Tea",
    "description": "Tea, brewed and unsweetened. Available in small, medium, and large sizes.",
    "price": 0.09,
-   "image": null,
+   "image": "img/brewed-unsweetened-tea.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1550,7 +1591,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "pepsi": {
    "id": "pepsi",
@@ -1558,7 +1600,7 @@
    "name": "Pepsi",
    "description": "The bold, refreshing, robust cola",
    "price": 0.09,
-   "image": null,
+   "image": "img/pepsi.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1582,7 +1624,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   },
   "diet-pepsi": {
    "id": "diet-pepsi",
@@ -1590,7 +1633,7 @@
    "name": "Diet Pepsi",
    "description": "A crisp tasting, refreshing pop of sweet, fizzy bubbles without calories.",
    "price": 0.09,
-   "image": null,
+   "image": "img/diet-pepsi.jpg",
    "modifiers": [
     {
      "id": "size",
@@ -1614,7 +1657,8 @@
      "example": true,
      "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
     }
-   ]
+   ],
+   "imageSource": "generated"
   }
  }
 }

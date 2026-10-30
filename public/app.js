@@ -41,16 +41,22 @@
   const count = () => S.cart.reduce((a, l) => a + l.qty, 0);
 
   // ---------- views ----------
-  const header = () => `<header class="top"><div class="wrap"><a class="brand" href="#/"><span class="logo">🍦</span>Christy's Tasty Queen</a><span class="grow"></span>
-    <button class="cartbtn" data-act="cart" data-testid="cartbtn">🛒 <span class="hide-s">Cart</span><b data-testid="cartcount">${count()}</b></button></div></header>`;
+  const header = () => `<header class="top"><div class="wrap"><a class="brand" href="#/" aria-label="Christy's Tasty Queen home"><img class="logo" src="/img/logo-180.jpg" alt="Christy's Tasty Queen logo" data-testid="logo"><span class="bname">Christy's<b>Tasty Queen</b></span></a><span class="grow"></span>
+    <a class="toplink hide-s" href="#c-sandwiches">Menu</a><a class="toplink hide-s" href="#visit">Visit</a>
+    <button class="cartbtn" data-act="cart" data-testid="cartbtn" aria-label="Cart">🛒 <span class="hide-s">Cart</span><b data-testid="cartcount" class="${count() ? 'bump' : ''}">${count()}</b></button></div></header>`;
+
+  // Branded fallback for items with no photo: brand color, item name, soft-serve swirl motif.
+  const PAL = [['#d7263d', '#8f1424'], ['#ff8a3d', '#d7263d'], ['#1d1b1a', '#4a2a22'], ['#ffc93c', '#ff8a3d']];
+  const fallback = (it, big) => { const h = [...it.id].reduce((a, c) => a + c.charCodeAt(0), 0) % PAL.length, [a, b] = PAL[h];
+    return `<div class="fb ${big ? 'big' : ''}" style="--a:${a};--b:${b}"><span class="swirl">🍦</span><span class="fbn">${esc(it.name)}</span><span class="fbt">Christy's</span></div>`; };
+  const photo = (it, cls = 'ph') => it.image ? `<div class="${cls}" style="background-image:url('/${it.image}')"></div>` : `<div class="${cls} nophoto">${fallback(it)}</div>`;
 
   const itemCard = (id, popular) => { const it = item(id); if (!it || it.hidden) return ''; const so = it.soldOut;
-    return `<button class="item ${so ? 'sold' : ''}" data-act="open" data-id="${id}" data-testid="item-${id}" ${so ? 'disabled' : ''}>
-      ${popular ? '' : `<div class="t"><h4>${esc(it.name)}</h4><p>${esc(it.description)}</p><div class="pr">${it.price < 0.5 && it.modifiers.length ? 'From ' : ''}${m(it.price)} ${so ? '<span class="badge">Sold out</span>' : ''}</div></div>`}
-      <div class="ph ${it.image ? '' : 'no'}" ${it.image ? `style="background-image:url('/${it.image}')"` : ''}>${it.image ? '' : '🍔'}<span class="plus">+</span></div>
-      ${popular ? `<div class="t"><h4>${esc(it.name)}</h4><div class="pr">${m(it.price)}</div></div>` : ''}</button>`; };
+    return `<button class="item ${popular ? 'popc' : ''} ${so ? 'sold' : ''}" data-act="open" data-id="${id}" data-testid="item-${id}" ${so ? 'disabled' : ''}>
+      ${photo(it)}<span class="plus" aria-hidden="true">+</span>${DDR[id] ? `<span class="rate">👍 ${DDR[id]}</span>` : ''}
+      <div class="t"><h4>${esc(it.name)}</h4>${popular ? '' : `<p>${esc(it.description)}</p>`}<div class="pr">${it.price < 0.5 && it.modifiers.length ? 'From ' : ''}${m(it.price)} ${so ? '<span class="badge">Sold out</span>' : ''}</div></div></button>`; };
 
-  const directBox = () => `<section class="direct" data-testid="whydirect"><h3>Why order direct? 💛</h3><ul>
+  const directBox = () => `<section class="direct reveal" data-testid="whydirect"><div><span class="kicker">Why order direct?</span><h2>Skip the app. Order from us.</h2></div><ul>
     <li><span>🏡</span><div><b>Support a local spot.</b> Your order goes straight to a Turner neighborhood favorite, not a big app.</div></li>
     <li><span>⚡</span><div><b>Faster pickup.</b> Your order hits Christy's kitchen right away, so it's hot and ready when you pull up.</div></li>
     <li><span>📞</span><div><b>Straight from Christy's.</b> Questions or special requests? You're talking to the folks making your food.</div></li></ul></section>`;
@@ -60,33 +66,42 @@
 
   const sumHtml = t => `<div class="sum"><div><span>Subtotal</span><span>${m(t.subtotal)}</span></div><div><span>Tax</span><span>${m(t.tax)}</span></div>${t.tip ? `<div><span>Tip</span><span>${m(t.tip)}</span></div>` : ''}<div class="tot"><span>Total</span><span data-testid="total">${m(t.total)}</span></div></div>`;
 
+  // Real DoorDash rating snippets seen on her store page (Oct 2026). No invented reviews.
+  const DDR = { tenderloin: '93% (47)', 'onion-rings': '100% (16)', 'breaded-mushrooms': '88% (18)' };
   const HERO = ['tenderloin', 'double-cheeseburger-french-fries', 'onion-rings', 'philly-cheese-steak', 'breaded-shrimp', 'flavor-option', 'seasoned-suzy-q-s'];
   const mosaic = () => { const its = HERO.map(item).filter(x => x && x.image && !x.hidden);
     return `<div class="mosaic" data-testid="hero-photos">${its.map((it, i) => `<button class="tile t${i}" data-act="open" data-id="${it.id}" style="background-image:url('/${it.image}')" aria-label="${esc(it.name)}"><span>${it.id === 'flavor-option' ? 'Shakes &amp; malts' : esc(it.name) + ' · ' + m(it.price)}</span></button>`).join('')}</div>`; };
   const ddBtn = (s, where) => `<a class="btn dd" href="${esc(s.doordashUrl)}" target="_blank" rel="noopener" data-testid="dd-${where}">🚗 Want delivery? Order on DoorDash</a>`;
-  const store = () => { const s = settings(), open = openNow(s), hero = item('tenderloin');
+  const CATICON = { extras: '🧂', 'sweet-treats': '🍦', 'sodas-floats-shakes-malts': '🥤', drinks: '🧃', 'daily-specials': '⭐' };
+  const catTiles = cats => `<section class="cats reveal" data-testid="cattiles"><div class="sech"><span class="kicker">Browse</span><h2>What are you craving?</h2></div><div class="ctiles">${cats.map(c => { const ph = c.items.map(item).find(x => x && x.image && !x.hidden);
+    return `<a class="ctile ${ph ? '' : 'noimg'}" href="#c-${c.id}" ${ph ? `style="background-image:url('/${ph.image}')"` : ''}>${ph ? '' : `<i>${CATICON[c.id] || '🍔'}</i>`}<span>${esc(c.name)}<small>${c.items.length} item${c.items.length === 1 ? "" : "s"}</small></span></a>`; }).join('')}</div></section>`;
+  const store = () => { const s = settings(), open = openNow(s);
     const cats = S.menu.categories.filter(c => c.items.some(id => item(id) && !item(id).hidden));
-    const q = S.q.toLowerCase();
-    return header() + `<section class="hero"><div class="wrap">${mosaic()}<div style="display:grid;gap:14px">
-      <div class="chips"><span class="chip ${open && s.acceptOrders ? 'open' : 'closed'}" data-testid="openchip">${open && s.acceptOrders ? '● Open now' : '● Closed, order ahead'}</span><span class="chip">🕙 ${todayHours(s)}</span><span class="chip">📍 Turner, KCK</span></div>
-      <h1>Burgers, tenderloins<br>& soft serve, made fresh.</h1>
-      <p>Order online from Christy's Tasty Queen for quick pickup. ${esc(s.address)}</p>
-      <div class="ctas"><span class="chip pick">🛍️ Pickup · ~${s.pickupMins} min</span>
-      <a class="btn y" href="#menu" data-act="tomenu">Start your order</a>${ddBtn(s, 'hero')}</div></div>
-</div></section>
+    const q = S.q.toLowerCase(), tel = s.phone.replace(/\D/g, ''), map = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent("Christy's Tasty Queen " + s.address);
+    return header() + `<section class="hero"><div class="wrap">${mosaic()}<div class="hcopy">
+      <img class="hlogo" src="/img/logo.jpg" alt="Christy's Tasty Queen" data-testid="hero-logo">
+      <div class="chips"><span class="chip ${open && s.acceptOrders ? 'open' : 'closed'}" data-testid="openchip"><i class="dot"></i>${open && s.acceptOrders ? 'Open now' : 'Closed, order ahead'}</span><span class="chip">🕙 ${todayHours(s)}</span><span class="chip">📍 Turner, KCK</span></div>
+      <h1>Crispy tenderloins.<br>Real burgers.<br><em>Cold soft serve.</em></h1>
+      <p>Turner's neighborhood drive-in at ${esc(s.address.split(',')[0])}. Order ahead and it's hot when you pull up.</p>
+      <div class="ctas"><a class="btn y xl" href="#c-sandwiches" data-act="tomenu" data-testid="order-pickup">Order pickup <span class="arrow">→</span></a><span class="chip pick">🛍️ Ready in ~${s.pickupMins} min</span></div>
+      ${ddBtn(s, 'hero')}</div></div></section>
+      <section class="proof wrap reveal" data-testid="proof"><div><b>#1</b><span>Most liked on DoorDash: the Tenderloin</span></div><div><b>100%</b><span>thumbs up on our Onion Rings (16 DoorDash ratings)</span></div><div><b>69</b><span>menu items made to order</span></div><div><b>📍</b><span>Right on S 55th St in Turner</span></div></section>
       <nav class="catnav" id="menu"><div class="wrap">${cats.map(c => `<a href="#c-${c.id}" data-act="cat" data-c="${c.id}">${esc(c.name)}</a>`).join('')}</div></nav>
       <div class="wrap layout"><main>
-        ${directBox()}
-        <div class="search"><input type="text" placeholder="Search the menu" value="${esc(S.q)}" data-in="q" data-testid="search" aria-label="Search the menu"></div>
-        ${q ? '' : `<section class="sec"><h2>🔥 Most popular</h2><div class="pop">${S.menu.popular.map(id => itemCard(id, true)).join('')}</div></section>`}
+        ${q ? '' : catTiles(cats)}
+        <div class="search"><input type="text" placeholder="Search tenderloin, shakes, onion rings..." value="${esc(S.q)}" data-in="q" data-testid="search" aria-label="Search the menu"></div>
+        ${q ? '' : `<section class="sec reveal"><div class="sech"><span class="kicker">Fan favorites</span><h2>🔥 Most popular</h2></div><div class="pop">${S.menu.popular.map(id => itemCard(id, true)).join('')}</div></section>`}
+        ${q ? '' : directBox()}
         ${cats.map(c => { const ids = c.items.filter(id => { const it = item(id); return it && !it.hidden && (!q || (it.name + ' ' + it.description).toLowerCase().includes(q)); }); if (!ids.length) return '';
           const note = /Sandwiches|Other Favorites/.test(c.name) ? 'Make it a basket: french fries and 3 onion rings.' : '';
-          return `<section class="sec" id="c-${c.id}"><h2>${esc(c.name)}</h2>${note ? `<p class="note">${note}</p>` : ''}<div class="grid">${ids.map(id => itemCard(id)).join('')}</div></section>`; }).join('')}
-        <footer class="foot"><b>Christy's Tasty Queen</b><span>${esc(s.address)}</span><a href="tel:${s.phone.replace(/\D/g, '')}">${esc(s.phone)}</a>
-          <span>${s.hours.map((h, i) => DAYS[i] + ' ' + (h.closed ? 'closed' : fmtT(h.open) + '-' + fmtT(h.close))).join(' · ')}</span>
+          return `<section class="sec" id="c-${c.id}"><div class="sech"><h2>${esc(c.name)}</h2>${note ? `<p class="note">${note}</p>` : ''}</div><div class="grid">${ids.map(id => itemCard(id)).join('')}</div></section>`; }).join('')}
+        <section class="visit reveal" id="visit" data-testid="visit"><div><span class="kicker">Come see us</span><h2>Hours & location</h2>
+          <p class="addr">${esc(s.address)}</p><div class="vbtns"><a class="btn dark" href="${map}" target="_blank" rel="noopener" data-testid="maplink">📍 Get directions</a><a class="btn ghost" href="tel:${tel}">📞 ${esc(s.phone)}</a></div></div>
+          <ul class="hours">${s.hours.map((h, i) => `<li class="${i === new Date().getDay() ? 'today' : ''}"><span>${DAYS[i]}</span><b>${h.closed ? 'Closed' : fmtT(h.open) + ' to ' + fmtT(h.close)}</b></li>`).join('')}</ul></section>
+        <footer class="foot"><b>Christy's Tasty Queen</b><span>${esc(s.address)} · <a href="tel:${tel}">${esc(s.phone)}</a></span>
           <span class="fine">Demo ordering site. Payments are simulated test mode, no real money. <a href="#/admin" data-testid="ownerlink">Owner login</a></span></footer>
-      </main><aside class="side card"><h3>Your order</h3>${cartLines()}${S.cart.length ? sumHtml(totals()) + '<a class="btn block" href="#/checkout" data-testid="side-checkout">Checkout</a>' : ''}</aside></div>
-      ${count() ? `<a class="btn fab" href="#/checkout" data-testid="fab"><span>View cart · ${count()}</span><span>${m(totals().subtotal)}</span></a>` : ''}`; };
+      </main><aside class="side"><div class="card"><h3>Your order</h3>${cartLines()}${S.cart.length ? sumHtml(totals()) + '<a class="btn block" href="#/checkout" data-testid="side-checkout">Checkout</a>' : ''}</div></aside></div>
+      ${count() ? `<a class="btn fab" href="#/checkout" data-testid="fab"><span class="fq">${count()}</span><span>View cart</span><span>${m(totals().subtotal)}</span></a>` : ''}`; };
 
   // ---------- item modal ----------
   let M = null;
@@ -97,7 +112,7 @@
   const renderModal = () => { const it = item(M.id), unit = lineUnit(it, M.sel), ok = modalValid(it);
     $('#modal').hidden = false; document.body.style.overflow = 'hidden';
     $('#modal').innerHTML = `<div class="sheet" role="dialog" aria-label="${esc(it.name)}" data-testid="itemmodal">
-      ${it.image ? `<div class="img" style="background-image:url('/${it.image}')"><button class="x" data-act="close" aria-label="Close">×</button></div>` : '<div style="position:relative;height:56px"><button class="x" data-act="close" aria-label="Close">×</button></div>'}
+      <div class="grab"></div><div class="img">${it.image ? `<div class="ph" style="background-image:url('/${it.image}')"></div>` : fallback(it, true)}<button class="x" data-act="close" aria-label="Close">×</button></div>
       <div class="bd"><div><h3>${esc(it.name)}</h3><p class="d">${esc(it.description)}</p><b>${m(it.price)}</b></div>
       ${(it.modifiers || []).map(g => `<div class="mg"><div class="h"><span>${esc(g.name)}</span>${g.required ? '<span class="req">Required</span>' : '<span class="opt2">Optional</span>'}</div>
         ${g.options.map((o, oi) => `<label class="opt"><input type="${g.type === 'single' ? 'radio' : 'checkbox'}" name="g_${g.id}" data-g="${g.id}" data-oi="${oi}" ${(M.sel[g.id] || []).includes(oi) ? 'checked' : ''} data-testid="opt-${g.id}-${oi}"><span>${esc(o.name)}</span>${o.price ? '+' + m(o.price) : ''}</label>`).join('')}</div>`).join('')}
@@ -176,14 +191,17 @@
         <div class="ord"><b>POS connection <span class="test">Stubbed</span></b><select data-ch="pos" data-testid="pos-select">${Object.values(POS.adapters).map(p => `<option value="${p.id}" ${s.pos === p.id ? 'selected' : ''}>${esc(p.label)}</option>`).join('')}</select>
         <span class="fine">Square, Clover and Toast adapters are built but stubbed until we know which POS Christy's uses. Orders get mapped to that POS's order format and logged here.</span>
         ${pl.map(x => `<span class="fine">${new Date(x.at).toLocaleTimeString()} · ${esc(x.provider)} · ${esc(x.action)}</span>`).join('')}</div>`; }
-    return header() + `<div class="wrap page"><div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-family:Fredoka">Owner dashboard</h1><button class="btn ghost sm" data-act="logout">Log out</button></div>
+    return header() + `<div class="wrap page"><div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-family:Fredoka;display:flex;align-items:center;gap:12px"><img class="alogo" src="/img/logo-180.jpg" alt="" data-testid="admin-logo">Owner dashboard</h1><button class="btn ghost sm" data-act="logout">Log out</button></div>
       <nav class="tabs">${tabs.map(([k, l]) => `<a href="#/admin" class="${tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" data-testid="tab-${k}">${l}</a>`).join('')}</nav><div class="card">${body}</div></div>`; };
 
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -40px 0px' }) : null;
+  const reveal = () => document.querySelectorAll('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('in'));
   // ---------- router ----------
   const render = () => { const h = location.hash || '#/'; let html;
     if (h.startsWith('#/checkout')) html = checkout(); else if (h.startsWith('#/order/')) html = confirmation(h.slice(8)); else if (h.startsWith('#/admin')) html = admin(); else html = store();
     const old = $('#co'), keep = old ? [...old.elements].filter(x => x.name && x.type !== 'radio').map(x => [x.name, x.value]) : null;
     $('#app').innerHTML = html;
+    reveal();
     const nf = $('#co'); if (keep && nf) keep.forEach(([k, v]) => { const x = nf.elements[k]; if (x && x.type !== 'radio' && x.tagName !== 'BUTTON') x.value = v; }); };
   window.addEventListener('hashchange', () => { if (!/^#c-|^#menu/.test(location.hash)) { render(); scrollTo(0, 0); } });
 
