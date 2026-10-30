@@ -12,7 +12,7 @@ with sync_playwright() as p:
     ok('menu renders 60+ cards', pg.locator('.item').count()>=60)
     ok('why order direct shown', 'Support a local spot' in pg.inner_text('[data-testid=whydirect]'))
     ok('no markup/placeholder copy', not re.search(r'markup|placeholder',pg.inner_text('body'),re.I))
-    pg.screenshot(path=SH+'m01-storefront.png')
+    pg.wait_for_timeout(700); pg.screenshot(path=SH+'m01-storefront.png'); ok('hero photos', pg.locator('[data-testid=hero-photos] .tile').count()>=5)
     pg.screenshot(path=SH+'m02-menu-full.png',full_page=True)
     # tenderloin + basket
     pg.click('#c-sandwiches [data-testid=item-tenderloin]'); pg.wait_for_selector('[data-testid=itemmodal]')

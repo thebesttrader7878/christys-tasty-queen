@@ -59,16 +59,19 @@
 
   const sumHtml = t => `<div class="sum"><div><span>Subtotal</span><span>${m(t.subtotal)}</span></div><div><span>Tax</span><span>${m(t.tax)}</span></div>${S.mode === 'delivery' ? `<div><span>Delivery fee</span><span>${m(t.deliveryFee)}</span></div>` : ''}${t.tip ? `<div><span>Tip</span><span>${m(t.tip)}</span></div>` : ''}<div class="tot"><span>Total</span><span data-testid="total">${m(t.total)}</span></div></div>`;
 
+  const HERO = ['tenderloin', 'double-cheeseburger-french-fries', 'onion-rings', 'philly-cheese-steak', 'breaded-shrimp', 'flavor-option', 'seasoned-suzy-q-s'];
+  const mosaic = () => { const its = HERO.map(item).filter(x => x && x.image && !x.hidden);
+    return `<div class="mosaic" data-testid="hero-photos">${its.map((it, i) => `<button class="tile t${i}" data-act="open" data-id="${it.id}" style="background-image:url('/${it.image}')" aria-label="${esc(it.name)}"><span>${it.id === 'flavor-option' ? 'Shakes &amp; malts' : esc(it.name) + ' · ' + m(it.price)}</span></button>`).join('')}</div>`; };
   const store = () => { const s = settings(), open = openNow(s), hero = item('tenderloin');
     const cats = S.menu.categories.filter(c => c.items.some(id => item(id) && !item(id).hidden));
     const q = S.q.toLowerCase();
-    return header() + `<section class="hero"><div class="wrap"><div style="display:grid;gap:14px">
+    return header() + `<section class="hero"><div class="wrap">${mosaic()}<div style="display:grid;gap:14px">
       <div class="chips"><span class="chip ${open && s.acceptOrders ? 'open' : 'closed'}" data-testid="openchip">${open && s.acceptOrders ? '● Open now' : '● Closed, order ahead'}</span><span class="chip">🕙 ${todayHours(s)}</span><span class="chip">📍 Turner, KCK</span></div>
       <h1>Burgers, tenderloins<br>& soft serve, made fresh.</h1>
       <p>Order online from Christy's Tasty Queen for quick pickup${s.deliveryOn ? ' or local delivery' : ''}. ${esc(s.address)}</p>
       <div class="ctas"><div class="modes" role="tablist"><button class="${S.mode === 'pickup' ? 'on' : ''}" data-act="mode" data-v="pickup" data-testid="mode-pickup">Pickup · ${s.pickupMins} min</button>${s.deliveryOn ? `<button class="${S.mode === 'delivery' ? 'on' : ''}" data-act="mode" data-v="delivery" data-testid="mode-delivery">Delivery · ${s.deliveryMins} min</button>` : ''}</div>
       <a class="btn y" href="#menu" data-act="tomenu">Start your order</a></div></div>
-      <div class="heroimg" style="background-image:url('/${hero && hero.image}')"></div></div></section>
+</div></section>
       <nav class="catnav" id="menu"><div class="wrap">${cats.map(c => `<a href="#c-${c.id}" data-act="cat" data-c="${c.id}">${esc(c.name)}</a>`).join('')}</div></nav>
       <div class="wrap layout"><main>
         ${directBox()}
