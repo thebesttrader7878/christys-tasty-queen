@@ -180,3 +180,4 @@ label.f{display:grid;gap:6px;font-weight:600;font-size:14px}
 .item .fb{padding:10px 44px 10px 10px}.pop .item .fb{padding:10px}
 .brand .logo{object-fit:cover;padding:0;background:#000;border:2px solid #fff}.hlogo{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 8px 24px -8px rgba(0,0,0,.35);margin-bottom:10px;display:block}.alogo{width:44px;height:44px;border-radius:12px;object-fit:cover}
 .hname{font:700 13px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#ffd84d;margin:0 0 8px}.bname{white-space:nowrap}
+.ostat{font-size:20px;padding:6px 14px;border-radius:999px;background:#fff1c7;color:#7a5600}.ostat.ready,.ostat.completed{background:#d6f5e2;color:#0d6b36}.ostat.canceled{background:#f2d4d4;color:#8a1111}.done.cx{border-color:#e5b5b5}

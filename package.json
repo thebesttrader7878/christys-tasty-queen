@@ -4,7 +4,16 @@
   "private": true,
   "description": "Demo online ordering site for Kimmie’s-Christy's Tasty Queen",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=18" },
-  "dependencies": { "express": "^4.21.2", "nodemailer": "^6.9.16" }
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "nodemailer": "^6.9.16",
+    "pg": "^8.23.1"
+  }
 }
