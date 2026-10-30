@@ -8,7 +8,6 @@
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const DEF_SETTINGS = {
     name: "Kimmie’s-Christy's Tasty Queen", phone: '(913) 300-0130', address: '1405 S 55th St, Kansas City, KS 66106',
-    orderEmail: '', // blank = server default (ORDER_EMAIL_TO or keys4cash.io@gmail.com)
     doordashUrl: 'https://www.doordash.com/store/christys-tasty-queen-kansas-city-35171507/',
     taxRate: 9.125, // example rate, confirm with owner / accountant
     pickupMins: 15,
@@ -156,7 +155,7 @@
       items: S.cart.map(l => Object.assign({}, l, { lineTotal: r2(l.unit * l.qty) })), ...t, payment: pay };
     o.pos = POS.current().pushOrder(o);
     const all = orders(); all.unshift(o); saveOrders(all);
-    try { const r = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ notifyEmail: settings().orderEmail || '' }, o)) }); o.email = await r.json(); } catch (e) { o.email = { ok: false, error: 'offline' }; }
+    try { const r = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) }); o.email = await r.json(); if (o.email && o.email.browserSend) { try { const b = o.email.browserSend; if (/^https:\/\/formspree\.io\/f\//.test(b.url)) { const fr = await fetch(b.url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(b.fields) }); const fb = await fr.json().catch(() => ({})); o.email = { ok: true, emailed: fr.ok && fb.ok !== false, via: 'formspree-browser', status: fr.status, formspree: fb }; } } catch (e) {} } } catch (e) { o.email = { ok: false, error: 'offline' }; }
     const all2 = orders(); all2[0] = o; saveOrders(all2);
     S.cart = []; S.tip = 0; saveCart(); location.hash = '#/order/' + id; };
 
@@ -187,8 +186,8 @@
     if (tab === 'hours') body = `<form id="setf" class="page" style="padding:0"><h3>Hours</h3>${s.hours.map((h, i) => `<div class="hrs"><b>${DAYS[i]}</b><input type="time" name="o${i}" value="${h.open}"><input type="time" name="c${i}" value="${h.close}"><label class="fine"><input type="checkbox" name="x${i}" ${h.closed ? 'checked' : ''}> Closed</label></div>`).join('')}
       <h3>Pickup</h3><div class="two"><label class="f">Pickup time (min)<input type="number" name="pickupMins" value="${s.pickupMins}"></label><label class="f">Sales tax %<input type="number" step="0.001" name="taxRate" value="${s.taxRate}"></label></div>
       <label class="f">DoorDash link (for delivery)<input type="text" name="doordashUrl" value="${esc(s.doordashUrl)}" data-testid="set-dd"></label>
-      <h3>Order emails</h3><label class="f">Send new orders to<input type="email" name="orderEmail" value="${esc(s.orderEmail || '')}" placeholder="keys4cash.io@gmail.com (default)" data-testid="set-email"></label>
-      <p class="fine" data-testid="email-note">First order to a new email sends an activation link; click it once. Leave blank to use the server default (ORDER_EMAIL_TO, or keys4cash.io@gmail.com).</p>
+      <h3>Order emails</h3><p data-testid="webhook-url">New orders go to: <code data-testid="webhook-current">loading...</code></p>
+      <p class="fine" data-testid="webhook-note">Ask Web Dev to change where orders go.</p>
       <button class="btn" data-testid="savesettings">Save</button></form>`;
     if (tab === 'payments') { const a = PAY.account(), pl = POS.log().slice(0, 5);
       body = `<div class="ord"><b>Stripe <span class="test">Simulated test mode</span></b>${a.status === 'connected' ? `<span>✅ Connected: ${esc(a.business)} (${esc(a.id)}) · payouts to ${esc(a.bank)}</span><button class="btn ghost sm" data-act="disc">Disconnect</button>` : a.status === 'pending' ? `<span>Step 2 of 2: add a bank for payouts (test)</span><button class="btn sm" data-act="finish" data-testid="stripe-finish">Add test bank & finish</button>` : `<span class="fine">Connect Christy's own Stripe account so card payments land in her bank. This is a simulation, no keys, no money.</span><button class="btn sm" data-act="connect" data-testid="stripe-connect">Connect with Stripe (test)</button>`}
@@ -207,6 +206,7 @@
     const old = $('#co'), keep = old ? [...old.elements].filter(x => x.name && x.type !== 'radio').map(x => [x.name, x.value]) : null;
     $('#app').innerHTML = html;
     reveal();
+    const wc = $('[data-testid=webhook-current]'); if (wc) fetch('/api/config').then(r => r.json()).then(c => { wc.textContent = c.webhook; }).catch(() => { wc.textContent = 'unavailable'; });
     const nf = $('#co'); if (keep && nf) keep.forEach(([k, v]) => { const x = nf.elements[k]; if (x && x.type !== 'radio' && x.tagName !== 'BUTTON') x.value = v; }); };
   window.addEventListener('hashchange', () => { if (!/^#c-|^#menu/.test(location.hash)) { render(); scrollTo(0, 0); } });
 
@@ -239,7 +239,7 @@
     else if (f.id === 'login') { if (f.pin.value === settings().pin) { sessionStorage.setItem('ctq_owner', '1'); render(); } else toast('Wrong PIN'); }
     else if (f.id === 'setf') { const d = Object.fromEntries(new FormData(f)), s = settings();
       s.hours = DAYS.map((x, i) => ({ open: d['o' + i], close: d['c' + i], closed: !!d['x' + i] }));
-      ['pickupMins', 'taxRate'].forEach(k => s[k] = +d[k]); s.doordashUrl = d.doordashUrl; s.orderEmail = String(d.orderEmail || '').trim(); saveSettings(s); toast('Saved'); render(); } });
+      ['pickupMins', 'taxRate'].forEach(k => s[k] = +d[k]); s.doordashUrl = d.doordashUrl; saveSettings(s); toast('Saved'); render(); } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && M) closeModal(); });
 
   window.CTQ = { totals, lineUnit, openNow };
