@@ -193,7 +193,7 @@
     pollConf(id);
     const st = ['new', 'preparing', 'ready'], k = o.status === 'completed' ? 3 : st.indexOf(o.status), cx = o.status === 'canceled';
     const full = o.refunded > 0 && o.refunded >= o.total - 0.001;
-    return header() + `<div class="wrap page" style="max-width:600px"><div class="card done ${cx ? 'cx' : ''}" data-testid="confirmation"><div class="big">${cx ? '😕' : o.status === 'ready' ? '🛍️' : '🎉'}</div><h2 style="margin:0">${cx ? `Order #${esc(o.id)} was canceled` : `Thanks, ${esc(o.customer.name.split(' ')[0])}! Order #${esc(o.id)} is in.`}</h2>
+    return header() + `<div class="wrap page" style="max-width:600px"><div class="card done ${cx ? 'cx' : ''}" data-testid="confirmation"><div class="big">${cx ? '😕' : o.status === 'ready' ? '🛍️' : '🎉'}</div><h2 style="margin:0">${cx ? `Order #${esc(o.id)} was canceled` : `Order placed! Thanks, ${esc(o.customer.name.split(' ')[0])}. Order #${esc(o.id)} is in.`}</h2>
       <p class="mut" style="margin:0" data-testid="conf-name">${esc(s.name)}</p>
       ${cx ? `<p style="margin:0" data-testid="cancel-reason">Reason: ${esc(o.cancelReason)}</p>` : `<p class="mut" style="margin:0">Pickup at ${esc(s.address)} in about ${s.pickupMins} min. ${o.when !== 'asap' ? '(' + esc(o.when) + ')' : ''}</p>
       <div class="steps">${st.map((x, i) => `<div class="${i <= k ? 'on' : ''}"></div>`).join('')}</div>`}

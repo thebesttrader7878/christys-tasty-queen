@@ -112,7 +112,7 @@
       <p class="mut" data-testid="stripe-explain">${on ? 'Card orders go straight to your Stripe account and Stripe sends the money to your bank.' : 'Connect Stripe so card orders land in your bank account. Takes about 5 minutes.'}</p>
       ${on ? `<p class="fine">Account ${esc(st.account)}${st.connectedAt ? ' · since ' + fmtDay(st.connectedAt) : ''}</p><button class="btn ghost" data-act="disconnect" data-testid="stripe-disconnect">Disconnect</button>`
            : `<a class="btn stripe" href="/api/admin/stripe/connect" data-testid="stripe-connect">Connect with Stripe</a>`}
-      ${demo ? '<p class="fine">This is a practice run. Real payouts switch on once Web Dev adds the Stripe keys.</p>' : ''}</section>`; };
+      ${demo ? '<p class="fine">This is a practice run. Real payouts turn on once your Stripe account is linked.</p>' : ''}</section>`; };
   const settings = () => { const s = S.settings; if (!s) return '<div class="empty">Loading...</div>';
     return pay() + `<form id="setf" class="card" data-testid="settings-form"><h2>Store</h2>
       <label class="tog big"><input type="checkbox" name="acceptOrders" ${s.acceptOrders ? 'checked' : ''} data-testid="set-accept"> Taking online orders</label>
@@ -120,7 +120,7 @@
       <div class="two"><label>Pickup time (min)<input type="number" name="pickupMins" min="1" max="180" value="${s.pickupMins}" data-testid="set-pickup"></label><label>Sales tax %<input type="number" step="0.001" name="taxRate" value="${s.taxRate}"></label></div>
       <label>DoorDash link<input name="doordashUrl" value="${esc(s.doordashUrl)}"></label>
       <button class="btn" data-testid="set-save">Save</button></form>
-      <div class="card"><h3>Where order alerts go</h3><p class="fine" data-testid="webhook-current">${esc(S.webhook || 'not set')}</p><p class="fine">Ask Web Dev to change where orders go.</p></div>
+      <div class="card"><h3>Where order alerts go</h3><p class="fine" data-testid="webhook-current">${esc(S.webhook || 'not set')}</p><p class="fine">Want alerts sent somewhere else? Ask your web person to switch it.</p></div>
       <div class="card"><p class="fine">Signed in as ${esc(S.me.email)}</p><button class="btn ghost" data-act="logout" data-testid="logout">Log out</button></div>`; };
 
   // ---------- shell ----------
@@ -130,7 +130,7 @@
     const body = { orders, analytics, reports, menu: menuTab, settings }[S.tab]();
     const nNew = S.orders.filter(x => x.status === 'new').length;
     document.title = (nNew ? `(${nNew}) ` : '') + 'Orders · Owner';
-    app.innerHTML = `<header class="top"><b>Christy's Owner</b><span class="fine">${S.me.store === 'postgres' ? 'Saved to database' : 'Saved to server file'}</span></header>
+    app.innerHTML = `<header class="top"><b>Owner dashboard</b><span class="fine">Kimmie’s-Christy's Tasty Queen</span></header>
       <main class="main" data-testid="tab-${S.tab}">${body}</main>
       <nav class="tabs" data-testid="tabbar">${TABS.map(([k, l, i]) => `<button class="${S.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" data-testid="tab-btn-${k}"><span>${i}</span>${l}${k === 'orders' && nNew ? `<em class="badge" data-testid="badge">${nNew}</em>` : ''}</button>`).join('')}</nav>
       ${o ? `<div class="scrim" data-act="close"></div>${detail(o)}` : ''}`;
