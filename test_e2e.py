@@ -42,7 +42,7 @@ with sync_playwright() as p:
     pg.fill('[data-testid=co-card]','4242 4242 4242 4242'); pg.click('[data-testid=placeorder]')
     pg.wait_for_selector('[data-testid=confirmation]')
     ok('confirmation', 'is in' in pg.inner_text('[data-testid=confirmation]'))
-    ok('server accepted email', 'emailed to the store' in pg.inner_text('[data-testid=confirmation]'))
+    ok('server accepted order', 'store got your order' in pg.inner_text('[data-testid=confirmation]'))
     pg.screenshot(path=SH+'m06-confirmation.png',full_page=True)
     oid=pg.url.split('/')[-1]
     # second order pickup, pay at store
