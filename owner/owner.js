@@ -27,22 +27,32 @@
   // New-order "ka-ching" cash register sound, synthesized with Web Audio (no audio files).
   // Browsers (iPhone Safari especially) only allow sound after a tap, so the first tap unlocks it.
   let actx = null;
-  const soundOn = () => LS.get('ctq_sound', true);
+  const soundOn = () => LS.get('ctq_sound2', true); // v2 key: everyone starts with sound on
   const unlock = () => { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume();
       const b = actx.createBuffer(1, 1, 22050), s = actx.createBufferSource(); s.buffer = b; s.connect(actx.destination); s.start(0); } catch (e) {}
     const p = $('[data-testid=sound-prompt]'); if (p && actx && actx.state !== 'suspended') p.remove(); };
   document.addEventListener('pointerdown', unlock); document.addEventListener('touchend', unlock); document.addEventListener('keydown', unlock);
   const audioReady = () => !!actx && actx.state === 'running';
-  const kaching = () => { if (!actx) return; const t0 = actx.currentTime + .02, out = actx.createGain(); out.gain.value = .55; out.connect(actx.destination);
-    // "ka": short noisy mechanical clack of the drawer
-    const n = actx.createBuffer(1, Math.floor(actx.sampleRate * .06), actx.sampleRate), d = n.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
-    const ns = actx.createBufferSource(), bp = actx.createBiquadFilter(), ng = actx.createGain(); ns.buffer = n; bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = .8; ng.gain.value = .9; ns.connect(bp); bp.connect(ng); ng.connect(out); ns.start(t0);
-    // "ching": bright bell, two strikes, inharmonic partials with long decay
-    [[t0 + .09, 1], [t0 + .2, .85]].forEach(([t, a]) => [[2093, 1], [2637, .5], [3136, .35], [4186, .25], [5274, .12]].forEach(([f, v]) => {
-      const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f * (1 + (Math.random() - .5) * .004); o.connect(g); g.connect(out);
-      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32 * v * a, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + 1.1 - f / 9000); o.start(t); o.stop(t + 1.2); })); };
+  // Original synthesized cash register "ka-ching": drawer clunk + coin rattle, then a bright shimmering bell (~1.3s).
+  // Same function renders the preview WAV offline (window.CTQ_KACHING with an OfflineAudioContext).
+  const kachingInto = (ac, t0) => { const sr = ac.sampleRate, comp = ac.createDynamicsCompressor(), out = ac.createGain();
+    comp.threshold.value = -14; comp.knee.value = 8; comp.ratio.value = 6; comp.attack.value = .002; comp.release.value = .2; out.gain.value = 1.6; out.connect(comp); comp.connect(ac.destination);
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const noise = (len, pow) => { const b = ac.createBuffer(1, Math.floor(sr * len), sr), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (rnd() * 2 - 1) * Math.pow(1 - i / d.length, pow); return b; };
+    const burst = (t, len, f, q, v, pow) => { const s = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = noise(len, pow); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q; g.gain.value = v; s.connect(bp); bp.connect(g); g.connect(out); s.start(t); };
+    const tone = (t, f, v, dec, type) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type || 'sine'; o.frequency.value = f; o.connect(g); g.connect(out); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + dec); o.start(t); o.stop(t + dec + .05); return o; };
+    // "ka": drawer clunk (low thump + wooden knock) and a quick metallic coin rattle
+    const th = tone(t0, 150, .7, .09); th.frequency.setValueAtTime(190, t0); th.frequency.exponentialRampToValueAtTime(80, t0 + .08);
+    burst(t0, .045, 900, 1.2, 1.4, 4);
+    [.025, .048, .066, .081, .097, .11, .122].forEach((d, i) => { burst(t0 + d, .02, 4200 + rnd() * 2600, 5, 1.3 - i * .1, 3); tone(t0 + d, 3400 + rnd() * 2200, .05, .05); });
+    // "ching": cash register bell, struck twice fast, inharmonic partials with detuned pairs for shimmer
+    const tb = t0 + .15, f0 = 1568, parts = [[1, .5, 1.5], [2.01, .3, 1.2], [2.76, .26, 1.0], [3.98, .14, .6], [5.42, .1, .45], [6.8, .06, .3], [8.93, .04, .22]];
+    [[tb, 1], [tb + .055, .55]].forEach(([t, a]) => { parts.forEach(([r, v, dec]) => [-2.2, 2.2].forEach(dt => tone(t, f0 * r + dt * r, v * a * .55, dec * (a < 1 ? .8 : 1)))); burst(t, .012, 7000, 1, .6 * a, 2); });
+    return 1.45; };
+  window.CTQ_KACHING = kachingInto;
+  const kaching = () => { if (!actx) return; kachingInto(actx, actx.currentTime + .02); };
   const chime = () => { window.__chimes = (window.__chimes || 0) + 1; if (!soundOn()) return; window.__played = (window.__played || 0) + (audioReady() ? 1 : 0); if (actx) { if (actx.state === 'suspended') actx.resume(); kaching(); } };
-  const soundBar = () => !S.me ? '' : `<div class="sndbar"><button class="chip ${soundOn() ? 'on' : ''}" data-act="sound" data-testid="sound-toggle" aria-pressed="${soundOn()}">${soundOn() ? '🔔 Sound on' : '🔕 Sound off'}</button>${soundOn() && !audioReady() ? '<button class="chip warn" data-act="sound-enable" data-testid="sound-prompt">Tap to enable order sound</button>' : ''}</div>`;
+  const soundBar = () => !S.me ? '' : `<div class="sndbar"><button class="chip ${soundOn() ? 'on' : ''}" data-act="sound" data-testid="sound-toggle" aria-pressed="${soundOn()}">${soundOn() ? '🔔 Sound on' : '🔕 Sound off'}</button>${soundOn() && !audioReady() ? '<button class="chip warn" data-act="sound-enable" data-testid="sound-prompt">🔈 Tap to enable sound</button>' : ''}</div>`;
 
   // ---------- login ----------
   const login = () => `<main class="login"><img src="/img/logo-180.jpg" alt="" class="logo"><h1>Owner login</h1><p class="mut">Kimmie’s-Christy's Tasty Queen</p>
@@ -182,7 +192,7 @@
 
   const act = async (a, el) => { try {
     if (a === 'tab') { S.tab = el.dataset.v; S.open = null; history.replaceState(null, '', '#' + S.tab); window.scrollTo(0, 0); render(); loadTab(); }
-    else if (a === 'sound') { LS.set('ctq_sound', !soundOn()); if (soundOn()) { unlock(); kaching(); } render(); }
+    else if (a === 'sound') { LS.set('ctq_sound2', !soundOn()); if (soundOn()) { unlock(); kaching(); } render(); }
     else if (a === 'sound-enable') { unlock(); kaching(); render(); }
     else if (a === 'filter') { S.filter = el.dataset.v; render(); }
     else if (a === 'open') { S.open = el.dataset.id; S.sheet = null; render(); }
@@ -202,7 +212,7 @@
     catch (er) { toast(er.message); loadTab(); } });
   document.addEventListener('submit', async e => { e.preventDefault(); const f = e.target, d = Object.fromEntries(new FormData(f)), btn = f.querySelector('button:not([type=button])');
     try { if (btn) btn.disabled = true;
-      if (f.id === 'loginf') { S.email = d.email; await api('/api/owner/login', { method: 'POST', body: { email: d.email, password: d.password, keep: !!d.keep } }); LS.set('ctq_keep', !!d.keep); S.err = ''; S.me = await api('/api/admin/me'); start(); return; }
+      if (f.id === 'loginf') { unlock(); S.email = d.email; await api('/api/owner/login', { method: 'POST', body: { email: d.email, password: d.password, keep: !!d.keep } }); LS.set('ctq_keep', !!d.keep); S.err = ''; S.me = await api('/api/admin/me'); start(); return; }
       if (f.id === 'cancelf') { const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/cancel`, { method: 'POST', body: { reason: d.reason } }); upd(r.order); toast('Order canceled'); }
       if (f.id === 'refundf') { const full = d.kind === 'full'; if (!full && !(+d.amount > 0)) throw new Error('Enter an amount.'); const r = await api(`/api/admin/orders/${encodeURIComponent(S.open)}/refund`, { method: 'POST', body: { full, amount: +d.amount, reason: d.reason } }); upd(r.order); toast('Refunded ' + m(r.order.refunds[r.order.refunds.length - 1].amount)); }
       if (f.id === 'rangef') { let a = d.from || today(), b = d.to || a; if (a > b) [a, b] = [b, a]; S.from = a; S.to = b; S.rep = null; S.an = null; render(); await loadTab(); }
