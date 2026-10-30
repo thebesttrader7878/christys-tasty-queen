@@ -1,0 +1,10 @@
+{
+  "name": "christys-tasty-queen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo online ordering site for Christy's Tasty Queen",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "express": "^4.21.2", "nodemailer": "^6.9.16" }
+}

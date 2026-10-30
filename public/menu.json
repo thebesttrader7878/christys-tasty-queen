@@ -1,0 +1,1620 @@
+{
+ "source": "DoorDash store 35171507, scraped 2026-10-30 (JSON-LD menu + embedded store data)",
+ "priceNote": "Prices as listed on DoorDash, confirmed real by Seven.",
+ "popular": [
+  "tenderloin",
+  "onion-rings",
+  "breaded-mushrooms",
+  "flavor-option",
+  "double-cheeseburger-french-fries",
+  "french-fries",
+  "cheeseburger",
+  "seasoned-suzy-q-s"
+ ],
+ "categories": [
+  {
+   "id": "daily-specials",
+   "name": "Daily Specials",
+   "items": [
+    "double-cheeseburger-french-fries"
+   ]
+  },
+  {
+   "id": "sandwiches",
+   "name": "Sandwiches",
+   "items": [
+    "cheeseburger",
+    "triple-cheeseburger",
+    "double-cheeseburger",
+    "philly-cheese-steak",
+    "breaded-chicken",
+    "polish-sausage",
+    "bbq-burnt-ends",
+    "fish-sandwich",
+    "ham-turkey-club",
+    "italian-steak",
+    "grilled-cheese",
+    "grilled-chicken",
+    "chicken-club",
+    "grilled-ham-cheese",
+    "bbq-ham",
+    "taco-burger",
+    "blt",
+    "double-hamburger",
+    "triple-hamburger",
+    "grilled-ham",
+    "grilled-tenderloin",
+    "tenderloin",
+    "hamburger"
+   ]
+  },
+  {
+   "id": "other-favorites",
+   "name": "Other Favorites",
+   "items": [
+    "breaded-shrimp",
+    "corn-dog",
+    "dinner-salad",
+    "grilled-chicken-salad",
+    "breaded-chicken-salad",
+    "breaded-chicken-strips",
+    "breaded-chicken-nuggets"
+   ]
+  },
+  {
+   "id": "sides",
+   "name": "Sides",
+   "items": [
+    "breaded-mushrooms",
+    "seasoned-suzy-q-s",
+    "mac-n-cheese-bites",
+    "cheeseballs",
+    "hot-poppers",
+    "mozzarella-sticks",
+    "breaded-cauliflower",
+    "basket-french-fries-3-onion-rings",
+    "tater-tots",
+    "onion-rings",
+    "french-fries"
+   ]
+  },
+  {
+   "id": "extras",
+   "name": "Extras",
+   "items": [
+    "extra-bun-plain",
+    "extra-bun-w-fixins",
+    "bbq-sauce",
+    "sliced-cheese",
+    "marinara",
+    "spicy-dipping-sauce",
+    "honey-mustard",
+    "tomato",
+    "ranch",
+    "bacon",
+    "horseradish",
+    "pickles"
+   ]
+  },
+  {
+   "id": "sweet-treats",
+   "name": "Sweet Treats",
+   "items": [
+    "vanilla-soft-serve-ice-cream-quart",
+    "vanilla-soft-serve-ice-cream-pint"
+   ]
+  },
+  {
+   "id": "sodas-floats-shakes-malts",
+   "name": "Sodas, Floats Shakes & Malts",
+   "items": [
+    "flavor-option"
+   ]
+  },
+  {
+   "id": "drinks",
+   "name": "Drinks",
+   "items": [
+    "dr-pepper",
+    "sweet-tea",
+    "diet-dr-pepper",
+    "big-red",
+    "root-beer",
+    "limeade",
+    "mountain-dew",
+    "starry",
+    "pink-lemonade",
+    "brewed-unsweetened-tea",
+    "pepsi",
+    "diet-pepsi"
+   ]
+  }
+ ],
+ "items": {
+  "double-cheeseburger-french-fries": {
+   "id": "double-cheeseburger-french-fries",
+   "doordashId": "27731799925",
+   "name": "Double Cheeseburger & French Fries",
+   "description": "Two beef patties, melted cheese, lettuce, pickles, and onions on a bun, served with french fries.",
+   "price": 12.49,
+   "image": "img/double-cheeseburger-french-fries.jpg",
+   "modifiers": []
+  },
+  "cheeseburger": {
+   "id": "cheeseburger",
+   "doordashId": "27731799902",
+   "name": "Cheeseburger",
+   "description": "Mustard, ketchup, lettuce, onion and pickle",
+   "price": 8.19,
+   "image": "img/cheeseburger.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "triple-cheeseburger": {
+   "id": "triple-cheeseburger",
+   "doordashId": "27731799903",
+   "name": "Triple Cheeseburger",
+   "description": "Mustard, ketchup, lettuce, onion and pickle",
+   "price": 11.99,
+   "image": "img/triple-cheeseburger.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "double-cheeseburger": {
+   "id": "double-cheeseburger",
+   "doordashId": "27731799894",
+   "name": "Double Cheeseburger",
+   "description": "Mustard, ketchup, lettuce, onion and pickle",
+   "price": 9.99,
+   "image": "img/double-cheeseburger.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "philly-cheese-steak": {
+   "id": "philly-cheese-steak",
+   "doordashId": "44425019876",
+   "name": "Philly Cheese Steak",
+   "description": "Tender, well-marbled steak, saut\u00e9ed onions and green peppers with a melty american/swiss cheese served in a soft but sturdy hoagie.",
+   "price": 10.65,
+   "image": "img/philly-cheese-steak.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "breaded-chicken": {
+   "id": "breaded-chicken",
+   "doordashId": "27731799900",
+   "name": "Breaded Chicken",
+   "description": "Mayonnaise and lettuce",
+   "price": 8.89,
+   "image": "img/breaded-chicken.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "polish-sausage": {
+   "id": "polish-sausage",
+   "doordashId": "27731799896",
+   "name": "Polish Sausage",
+   "description": "Grilled Polish sausage with tangy mustard and sauerkraut, served in a soft bun.",
+   "price": 7.19,
+   "image": "img/polish-sausage.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "bbq-burnt-ends": {
+   "id": "bbq-burnt-ends",
+   "doordashId": "27731799897",
+   "name": "Bbq Burnt Ends",
+   "description": "Tender BBQ burnt ends layered in a soft bun.",
+   "price": 10.49,
+   "image": "img/bbq-burnt-ends.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "fish-sandwich": {
+   "id": "fish-sandwich",
+   "doordashId": "27731799907",
+   "name": "Fish Sandwich",
+   "description": "A piece of blue whiting fish on a bun with lettuce and your choice or mayo, tartar sauce or a spicy sauce.",
+   "price": 9.09,
+   "image": "img/fish-sandwich.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "ham-turkey-club": {
+   "id": "ham-turkey-club",
+   "doordashId": "27731799930",
+   "name": "Ham & Turkey Club",
+   "description": "Mayonnaise, lettuce, tomato, cheese, bacon, ham and turkey.",
+   "price": 10.49,
+   "image": "img/ham-turkey-club.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "italian-steak": {
+   "id": "italian-steak",
+   "doordashId": "27731799906",
+   "name": "Italian Steak",
+   "description": "Lettuce and onion",
+   "price": 8.69,
+   "image": "img/italian-steak.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "grilled-cheese": {
+   "id": "grilled-cheese",
+   "doordashId": null,
+   "name": "Grilled Cheese",
+   "description": "Cheesy delight on toasted bread, perfect for those craving a classic comfort food.",
+   "price": 6.69,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "grilled-chicken": {
+   "id": "grilled-chicken",
+   "doordashId": null,
+   "name": "Grilled Chicken",
+   "description": "Mayonnaise and lettuce",
+   "price": 8.69,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "chicken-club": {
+   "id": "chicken-club",
+   "doordashId": null,
+   "name": "Chicken Club",
+   "description": "Breaded or Grilled chicken w/bacon, cheese, tomato, lettuce and mayonnaise",
+   "price": 9.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "grilled-ham-cheese": {
+   "id": "grilled-ham-cheese",
+   "doordashId": null,
+   "name": "Grilled Ham & Cheese",
+   "description": "Mayonnaise and lettuce",
+   "price": 8.19,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "bbq-ham": {
+   "id": "bbq-ham",
+   "doordashId": null,
+   "name": "Bbq Ham",
+   "description": "",
+   "price": 8.19,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "taco-burger": {
+   "id": "taco-burger",
+   "doordashId": null,
+   "name": "Taco Burger",
+   "description": "Ground beef, lettuce, cheese and taco sauce",
+   "price": 8.19,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "blt": {
+   "id": "blt",
+   "doordashId": null,
+   "name": "BLT",
+   "description": "Crispy bacon, fresh lettuce, and tomato on toasted bread.",
+   "price": 8.19,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "double-hamburger": {
+   "id": "double-hamburger",
+   "doordashId": null,
+   "name": "Double Hamburger",
+   "description": "Mustard, ketchup, lettuce, onion and pickle",
+   "price": 9.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "triple-hamburger": {
+   "id": "triple-hamburger",
+   "doordashId": null,
+   "name": "Triple Hamburger",
+   "description": "Mustard, ketchup, lettuce, onion and pickle",
+   "price": 10.99,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "grilled-ham": {
+   "id": "grilled-ham",
+   "doordashId": null,
+   "name": "Grilled Ham",
+   "description": "Mayonnaise and lettuce",
+   "price": 6.39,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "grilled-tenderloin": {
+   "id": "grilled-tenderloin",
+   "doordashId": "44282410432",
+   "name": "Grilled Tenderloin",
+   "description": "Juicy grilled tenderloin with crisp lettuce and a fried egg on a soft bun.",
+   "price": 13.79,
+   "image": "img/grilled-tenderloin.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "tenderloin": {
+   "id": "tenderloin",
+   "doordashId": "27731799890",
+   "name": "Tenderloin",
+   "description": "Crispy breaded pork tenderloin topped with shredded lettuce on a soft bun.",
+   "price": 13.79,
+   "image": "img/tenderloin.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "hamburger": {
+   "id": "hamburger",
+   "doordashId": null,
+   "name": "Hamburger",
+   "description": "Mustard, ketchup, lettuce, onion and pickle",
+   "price": 7.19,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "breaded-shrimp": {
+   "id": "breaded-shrimp",
+   "doordashId": "27731799911",
+   "name": "Breaded Shrimp",
+   "description": "Add a basket includes french fries and 3 onion rings",
+   "price": 8.69,
+   "image": "img/breaded-shrimp.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "corn-dog": {
+   "id": "corn-dog",
+   "doordashId": null,
+   "name": "Corn Dog",
+   "description": "Add a basket includes french fries and 3 onion rings",
+   "price": 6.69,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "dinner-salad": {
+   "id": "dinner-salad",
+   "doordashId": null,
+   "name": "Dinner Salad",
+   "description": "Iceberg lettuce, ham, turkey, bacon, tomato and cheese. Add a basket includes french fries and 3 onion rings",
+   "price": 9.49,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "grilled-chicken-salad": {
+   "id": "grilled-chicken-salad",
+   "doordashId": null,
+   "name": "Grilled Chicken Salad",
+   "description": "Iceburg lettuce, tomato and cheese. Add a basket includes french fries and 3 onion rings",
+   "price": 10.29,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "breaded-chicken-salad": {
+   "id": "breaded-chicken-salad",
+   "doordashId": "27731799931",
+   "name": "Breaded Chicken Salad",
+   "description": "Iceburg lettuce, tomato and cheese.  Add a basket includes french fries and 3 onion rings",
+   "price": 10.29,
+   "image": "img/breaded-chicken-salad.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "breaded-chicken-strips": {
+   "id": "breaded-chicken-strips",
+   "doordashId": "27731799913",
+   "name": "Breaded Chicken Strips",
+   "description": "3 Pieces. Add a basket includes french fries and 3 onion rings",
+   "price": 8.89,
+   "image": "img/breaded-chicken-strips.jpg",
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "breaded-chicken-nuggets": {
+   "id": "breaded-chicken-nuggets",
+   "doordashId": null,
+   "name": "Breaded Chicken Nuggets",
+   "description": "6 Pieces. Add a basket includes french fries and 3 onion rings",
+   "price": 6.69,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "basket",
+     "name": "Make it a basket (fries + 3 onion rings)",
+     "type": "single",
+     "required": false,
+     "options": [
+      {
+       "name": "No basket",
+       "price": 0
+      },
+      {
+       "name": "Add basket",
+       "price": 7.69
+      }
+     ],
+     "source": "inferred: DoorDash says 'Add a basket includes french fries and 3 onion rings'; price uses the DoorDash Basket side item ($7.69). Confirm."
+    }
+   ]
+  },
+  "breaded-mushrooms": {
+   "id": "breaded-mushrooms",
+   "doordashId": "27731799922",
+   "name": "Breaded Mushrooms",
+   "description": "Crispy Breaded Mushrooms, Golden and Perfectly Seasoned",
+   "price": 6.29,
+   "image": "img/breaded-mushrooms.jpg",
+   "modifiers": []
+  },
+  "seasoned-suzy-q-s": {
+   "id": "seasoned-suzy-q-s",
+   "doordashId": "27731799916",
+   "name": "Seasoned Suzy Q's",
+   "description": "Curly fries seasoned with a blend of spices.",
+   "price": 6.29,
+   "image": "img/seasoned-suzy-q-s.jpg",
+   "modifiers": []
+  },
+  "mac-n-cheese-bites": {
+   "id": "mac-n-cheese-bites",
+   "doordashId": "27731799915",
+   "name": "Mac N'cheese Bites",
+   "description": "(8)",
+   "price": 6.29,
+   "image": "img/mac-n-cheese-bites.jpg",
+   "modifiers": []
+  },
+  "cheeseballs": {
+   "id": "cheeseballs",
+   "doordashId": "27731799919",
+   "name": "Cheeseballs",
+   "description": "15",
+   "price": 6.29,
+   "image": "img/cheeseballs.jpg",
+   "modifiers": []
+  },
+  "hot-poppers": {
+   "id": "hot-poppers",
+   "doordashId": "27731799920",
+   "name": "Hot Poppers",
+   "description": "5",
+   "price": 6.29,
+   "image": "img/hot-poppers.jpg",
+   "modifiers": []
+  },
+  "mozzarella-sticks": {
+   "id": "mozzarella-sticks",
+   "doordashId": "27731799921",
+   "name": "Mozzarella Sticks",
+   "description": "Crispy fried cheese sticks, perfect for an appetizer or snack.",
+   "price": 6.29,
+   "image": "img/mozzarella-sticks.jpg",
+   "modifiers": []
+  },
+  "breaded-cauliflower": {
+   "id": "breaded-cauliflower",
+   "doordashId": null,
+   "name": "Breaded Cauliflower",
+   "description": "Crispy, golden-breaded cauliflower florets.",
+   "price": 6.29,
+   "image": null,
+   "modifiers": []
+  },
+  "basket-french-fries-3-onion-rings": {
+   "id": "basket-french-fries-3-onion-rings",
+   "doordashId": null,
+   "name": "Basket (French Fries & 3 onion rings)",
+   "description": "A basket is the perfect addition to any sandwich! Enjoy a full order of french fries and 3 onion rings or swap out the fries for your favorite side!",
+   "price": 7.69,
+   "image": null,
+   "modifiers": []
+  },
+  "tater-tots": {
+   "id": "tater-tots",
+   "doordashId": null,
+   "name": "Tater  Tots",
+   "description": "18",
+   "price": 5.79,
+   "image": null,
+   "modifiers": []
+  },
+  "onion-rings": {
+   "id": "onion-rings",
+   "doordashId": "27731799923",
+   "name": "Onion Rings",
+   "description": "Crispy golden-fried onion rings, perfectly seasoned for a savory crunch.",
+   "price": 6.29,
+   "image": "img/onion-rings.jpg",
+   "modifiers": []
+  },
+  "french-fries": {
+   "id": "french-fries",
+   "doordashId": "27731799924",
+   "name": "French Fries",
+   "description": "Crispy golden strips of deliciousness served hot and seasoned to perfection.",
+   "price": 5.79,
+   "image": "img/french-fries.jpg",
+   "modifiers": []
+  },
+  "extra-bun-plain": {
+   "id": "extra-bun-plain",
+   "doordashId": null,
+   "name": "Extra Bun (plain)",
+   "description": "",
+   "price": 1.99,
+   "image": null,
+   "modifiers": []
+  },
+  "extra-bun-w-fixins": {
+   "id": "extra-bun-w-fixins",
+   "doordashId": null,
+   "name": "Extra Bun (w/fixins)",
+   "description": "",
+   "price": 2.49,
+   "image": null,
+   "modifiers": []
+  },
+  "bbq-sauce": {
+   "id": "bbq-sauce",
+   "doordashId": null,
+   "name": "Bbq Sauce",
+   "description": "",
+   "price": 0.79,
+   "image": null,
+   "modifiers": []
+  },
+  "sliced-cheese": {
+   "id": "sliced-cheese",
+   "doordashId": null,
+   "name": "Sliced Cheese",
+   "description": "",
+   "price": 0.99,
+   "image": null,
+   "modifiers": []
+  },
+  "marinara": {
+   "id": "marinara",
+   "doordashId": null,
+   "name": "Marinara",
+   "description": "",
+   "price": 0.99,
+   "image": null,
+   "modifiers": []
+  },
+  "spicy-dipping-sauce": {
+   "id": "spicy-dipping-sauce",
+   "doordashId": null,
+   "name": "Spicy Dipping Sauce",
+   "description": "",
+   "price": 0.99,
+   "image": null,
+   "modifiers": []
+  },
+  "honey-mustard": {
+   "id": "honey-mustard",
+   "doordashId": null,
+   "name": "Honey Mustard",
+   "description": "",
+   "price": 0.99,
+   "image": null,
+   "modifiers": []
+  },
+  "tomato": {
+   "id": "tomato",
+   "doordashId": null,
+   "name": "Tomato",
+   "description": "",
+   "price": 0.99,
+   "image": null,
+   "modifiers": []
+  },
+  "ranch": {
+   "id": "ranch",
+   "doordashId": null,
+   "name": "Ranch",
+   "description": "",
+   "price": 0.99,
+   "image": null,
+   "modifiers": []
+  },
+  "bacon": {
+   "id": "bacon",
+   "doordashId": null,
+   "name": "Bacon",
+   "description": "(2)",
+   "price": 3.89,
+   "image": null,
+   "modifiers": []
+  },
+  "horseradish": {
+   "id": "horseradish",
+   "doordashId": null,
+   "name": "Horseradish",
+   "description": "",
+   "price": 0.79,
+   "image": null,
+   "modifiers": []
+  },
+  "pickles": {
+   "id": "pickles",
+   "doordashId": null,
+   "name": "Pickles",
+   "description": "",
+   "price": 0.59,
+   "image": null,
+   "modifiers": []
+  },
+  "vanilla-soft-serve-ice-cream-quart": {
+   "id": "vanilla-soft-serve-ice-cream-quart",
+   "doordashId": null,
+   "name": "Vanilla Soft Serve Ice Cream",
+   "description": "Quart",
+   "price": 5.79,
+   "image": null,
+   "modifiers": []
+  },
+  "vanilla-soft-serve-ice-cream-pint": {
+   "id": "vanilla-soft-serve-ice-cream-pint",
+   "doordashId": null,
+   "name": "Vanilla Soft Serve Ice Cream",
+   "description": "Pint",
+   "price": 4.39,
+   "image": null,
+   "modifiers": []
+  },
+  "flavor-option": {
+   "id": "flavor-option",
+   "doordashId": "27731799944",
+   "name": "Flavor Option",
+   "description": "Soda (Small)  \nVanilla, chocolate, strawberry, hot fudge, black raspberry, cherry, butterscotch, coffee, banana, peanut butter, caramel, cookies & cream flavors.",
+   "price": 0.09,
+   "image": "img/flavor-option.jpg",
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    },
+    {
+     "id": "flavor",
+     "name": "Flavor",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Vanilla",
+       "price": 0
+      },
+      {
+       "name": "Chocolate",
+       "price": 0
+      },
+      {
+       "name": "Strawberry",
+       "price": 0
+      },
+      {
+       "name": "Hot fudge",
+       "price": 0
+      }
+     ],
+     "source": "from DoorDash description"
+    }
+   ]
+  },
+  "dr-pepper": {
+   "id": "dr-pepper",
+   "doordashId": null,
+   "name": "Dr. Pepper",
+   "description": "Unique blend of 23 flavors, carbonated soft drink.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "sweet-tea": {
+   "id": "sweet-tea",
+   "doordashId": null,
+   "name": "Sweet Tea",
+   "description": "Refreshing sweet tea brewed to perfection.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "diet-dr-pepper": {
+   "id": "diet-dr-pepper",
+   "doordashId": null,
+   "name": "Diet Dr. Pepper",
+   "description": "Crisp, Sugar-Free Dr. Pepper with a Unique Blend of 23 Flavors",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "big-red": {
+   "id": "big-red",
+   "doordashId": null,
+   "name": "Big Red",
+   "description": "Various size options available: Small, Medium, Large.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "root-beer": {
+   "id": "root-beer",
+   "doordashId": null,
+   "name": "Root Beer",
+   "description": "Smooth, classic root beer with a rich, frothy head. Perfectly sweet and endlessly refreshing.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "limeade": {
+   "id": "limeade",
+   "doordashId": null,
+   "name": "Limeade",
+   "description": "Refreshing lime beverage. Available in Small, Medium, or Large sizes.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "mountain-dew": {
+   "id": "mountain-dew",
+   "doordashId": null,
+   "name": "Mountain Dew",
+   "description": "Exhilarate and quench your thirst with a one of a kind taste.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "starry": {
+   "id": "starry",
+   "doordashId": null,
+   "name": "Starry",
+   "description": "Refreshing clear soda, formerly known as Sierra Mist.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "pink-lemonade": {
+   "id": "pink-lemonade",
+   "doordashId": null,
+   "name": "Pink Lemonade",
+   "description": "Refreshing, slightly tangy pink lemonade with a sweet, colorful twist.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "brewed-unsweetened-tea": {
+   "id": "brewed-unsweetened-tea",
+   "doordashId": null,
+   "name": "Brewed Unsweetened Tea",
+   "description": "Tea, brewed and unsweetened. Available in small, medium, and large sizes.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "pepsi": {
+   "id": "pepsi",
+   "doordashId": null,
+   "name": "Pepsi",
+   "description": "The bold, refreshing, robust cola",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  },
+  "diet-pepsi": {
+   "id": "diet-pepsi",
+   "doordashId": null,
+   "name": "Diet Pepsi",
+   "description": "A crisp tasting, refreshing pop of sweet, fizzy bubbles without calories.",
+   "price": 0.09,
+   "image": null,
+   "modifiers": [
+    {
+     "id": "size",
+     "name": "Size",
+     "type": "single",
+     "required": true,
+     "options": [
+      {
+       "name": "Small",
+       "price": 2.0
+      },
+      {
+       "name": "Medium",
+       "price": 2.5
+      },
+      {
+       "name": "Large",
+       "price": 3.0
+      }
+     ],
+     "example": true,
+     "source": "EXAMPLE DATA: DoorDash lists sizes but the size prices were not captured"
+    }
+   ]
+  }
+ }
+}
