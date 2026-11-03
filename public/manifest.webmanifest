@@ -1,0 +1,16 @@
+{
+  "name": "Kimmie’s-Christy's Tasty Queen",
+  "short_name": "Tasty Queen",
+  "description": "Order pickup from Kimmie’s-Christy's Tasty Queen, Kansas City KS.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbf6ee",
+  "theme_color": "#d7263d",
+  "icons": [
+    { "src": "/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

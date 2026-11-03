@@ -390,6 +390,7 @@ const ownerDir = path.join(__dirname, 'owner');
 app.use('/owner', (req, res, next) => { res.set('X-Robots-Tag', 'noindex, nofollow'); res.set('Cache-Control', 'no-store'); next(); });
 app.get(['/owner', '/owner/'], (req, res) => res.sendFile(path.join(ownerDir, 'index.html')));
 app.use('/owner', express.static(ownerDir));
+app.get(['/sw.js', '/manifest.webmanifest'], (req, res, next) => { res.set('Cache-Control', 'no-cache'); if (req.path === '/manifest.webmanifest') res.type('application/manifest+json'); next(); });
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 app.get('/healthz', (req, res) => res.json({ ok: true, notify: 'formspree', webhook: WEBHOOK_URL, smtpFallback: smtpReady, store: store.kind, ownerLogin: !!(OWNER_EMAIL && OWNER_HASH), stripe: STRIPE_LIVE ? 'live' : 'demo' }));
 app.use('/api', (req, res) => res.status(404).json({ ok: false, error: 'Not found' }));
